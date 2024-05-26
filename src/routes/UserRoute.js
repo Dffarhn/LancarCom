@@ -2,7 +2,7 @@ const { validateRequestBody } = require("../function/Validator");
 const { AddUser,  SearchUser } = require("../model/user");
 const jwt = require("jsonwebtoken");
 
-const RegisterUser = async (req, res) => {
+const LoginUser = async (req, res) => {
     try {
       const data = req.body;
       const requiredFields = [ "email", "password"];
@@ -45,7 +45,7 @@ const RegisterUser = async (req, res) => {
   }
 
 
-  const LoginUser =  async (req, res) => {
+  const RegisterUser =  async (req, res) => {
     try {
       const data = req.body;
       const requiredFields = ["username", "email", "password", "asal_daerah"];

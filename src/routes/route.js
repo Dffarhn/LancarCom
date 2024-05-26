@@ -11,9 +11,9 @@ route.get("/", (req, res) => {
   res.send("halo world");
 });
 
-route.post("/login", RegisterUser );
+route.post("/login", LoginUser );
 
-route.post("/register", LoginUser);
+route.post("/register", RegisterUser);
 
 
 //endpoint for dompet
