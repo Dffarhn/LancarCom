@@ -1,5 +1,6 @@
 const { validateRequestBody } = require("../function/Validator");
 const { SearchUserForAccessIdDB, AddAlurKeuanganDB, VerifyAlurKeuanganDB } = require("../model/DataKeuanganModel");
+const { GetDompetAuthDB, UpdateDompetAuthDB } = require("../model/DompetAuth");
 
 const AddAlurKeuangan = async (req, res) => {
   try {
@@ -59,8 +60,23 @@ const VerifyAlurKeuangan = async (req, res) => {
       res.status(500).json({ message: `Failed to Add Alur Keuangan ke database` });
     }
 
+    const UpdateToSPesificDompet = await GetDompetAuthDB(user[0].access_id)
+
+    const datatoupdate = {
+      access_id: user[0].access_id,
+      uang_masuk: VerifyAlurKeuangan[0].uang_diterima,
+      uang_sekarang: UpdateToSPesificDompet[0].uang_sekarang + VerifyAlurKeuangan[0].uang_diterima,
+      tanggal_update: new Date(),
+    }
+
+    const UpdateDompet = UpdateDompetAuthDB(datatoupdate)
+
+    if (UpdateDompet) {
+      
+      res.status(200).json({ message: "Alur Keuangan Verify successfully" });
+    }
+
     // Respond with success message
-    res.status(200).json({ message: "Alur Keuangan Verify successfully" });
   } catch (error) {
     res.status(500).json({ message: `Failed to Verify Alur Keuangan: ${error.message}` });
   }

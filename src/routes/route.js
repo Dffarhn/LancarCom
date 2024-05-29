@@ -4,6 +4,8 @@ const { RegisterUser, LoginUser } = require("./UserRoute");
 const { GetDompet } = require("./DompetAuth");
 const { Auth_Access } = require("../middleware/AccessRoute");
 const { AddAlurKeuangan, VerifyAlurKeuangan } = require("./DataKeuanganAuth");
+const { GetAllDaerahAccessId, AddRequestAccessId } = require("./AccessIdRoute");
+const { AddReviewUser, GetReviewUser } = require("./ReviewRoute");
 
 const route = Router();
 
@@ -22,10 +24,21 @@ route.get("/dompet/:access_id",GetDompet)
 
 
 //request access id for user government
+route.get("/access_id/daerah",GetAllDaerahAccessId)
+route.post("/request/access_id",Auth_Access,AddRequestAccessId)
+
+
 
 
 //post data_keuangan
 route.post("/add/alur/keuangan",Auth_Access,AddAlurKeuangan)
 route.patch("/verify/alur/keuangan/:id",Auth_Access,VerifyAlurKeuangan)
+
+
+
+//Review User
+
+route.get("/review",Auth_Access,GetReviewUser)
+route.post("/review",Auth_Access,AddReviewUser)
 
 module.exports = { route };

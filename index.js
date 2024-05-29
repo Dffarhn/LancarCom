@@ -7,8 +7,12 @@ dotenv.config()
 
 const app = express();
 const PORT = process.env.PORT || 3002
-
-app.use(cors())
+const corsOptions = {
+    origin: "*", // Replace 'https://example.com' with your specific URL
+    optionsSuccessStatus: 200, // Some legacy browsers (IE11, various SmartTVs) choke on 204
+    methods: ["GET", "POST", "PUT", "DELETE","PATCH"], // Allow specified HTTP methods
+  };
+app.use(cors(corsOptions))
 app.use(express.json())
 app.use(cookieparser());
 

@@ -14,7 +14,7 @@ const LoginUser = async (req, res) => {
   
       const searchingUser = await SearchUser(data)
   
-      if (searchingUser.length > 0) {
+      if (searchingUser) {
         const payload = { id: searchingUser.id, username: searchingUser.username, email: searchingUser.email };
         const accessToken = jwt.sign(payload, process.env.SECRET_KEY_TOKEN, {
           expiresIn: "10m",
@@ -35,7 +35,7 @@ const LoginUser = async (req, res) => {
         res.status(200).send({ msg: "Login successful", data: searchingUser });
           
       }else{
-          res.status(500).send({ msg: "Internal server error" });
+          res.status(500).send({ msg: "User Not Found" });
       }
   
     } catch (error) {
@@ -80,7 +80,7 @@ const LoginUser = async (req, res) => {
         res.status(500).send({ msg: "Internal server error" });
       }
     } catch (error) {
-      res.status(500).send({ msg: error.message });
+      res.status(500).send({ msg: `${error.message}` });
     }
   }
 

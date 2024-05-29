@@ -80,13 +80,16 @@ async function check_emailToDB(email) {
         const values = [email];
 
         const queryText = `SELECT * FROM userdb WHERE email = $1`;
+        
 
         const { rows } = await pool.query(queryText, values);
-
-        if (rows.length > 0) {
+        console.log(rows[0])
+        if (rows[0]) {
             const userDBpassword = rows[0].password;
+            console.log(userDBpassword)
 
             const checksamepassword = await comparePasswordBcrypt(password, userDBpassword);
+            console.log(checksamepassword)
             if (checksamepassword) {
                 return rows[0]; // Return the user object if password is correct
             } else {

@@ -104,7 +104,7 @@ async function VerifyAlurKeuanganDB(data, user, id) {
         status = $3
     WHERE
         id = $4
-    RETURNING id;
+    RETURNING id,uang_diterima;
 `;
 
     const { rows } = await pool.query(queryText, queryValues);
