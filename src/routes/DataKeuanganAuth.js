@@ -1,5 +1,5 @@
 const { validateRequestBody } = require("../function/Validator");
-const { SearchUserForAccessIdDB, AddAlurKeuanganDB, VerifyAlurKeuanganDB } = require("../model/DataKeuanganModel");
+const { SearchUserForAccessIdDB, AddAlurKeuanganDB, VerifyAlurKeuanganDB, GetAllDataKeuanganToDB, GetStatisticAllDataKeuanganToDB, GetAllDataKeuanganToDBPenerima, GetDataKeuanganToDB, GetDataKeuanganToDBPenerima } = require("../model/DataKeuanganModel");
 const { GetDompetAuthDB, UpdateDompetAuthDB } = require("../model/DompetAuth");
 
 const AddAlurKeuangan = async (req, res) => {
@@ -82,4 +82,163 @@ const VerifyAlurKeuangan = async (req, res) => {
   }
 };
 
-module.exports = { AddAlurKeuangan,VerifyAlurKeuangan };
+
+const GetAllDataKeuangan = async (req,res)=>{
+  try {
+
+    const userId = req.user.id;
+    // Use the user ID to fetch user details from the database
+    const user = await SearchUserForAccessIdDB(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const {access_id} = user[0];
+
+
+
+    const AllDataKeuangan = await GetAllDataKeuanganToDB(access_id)
+
+    if (AllDataKeuangan) {
+      res.status(200).send({ msg: "Query Successfully", data: AllDataKeuangan });
+    } else {
+      throw new Error("failed to get fetch from Database");
+    }
+
+
+    
+  } catch (error) {
+    res.status(500).send({msg:`${error.message}`})
+    
+  }
+}
+const GetAllDataKeuanganPenerima = async (req,res)=>{
+  try {
+
+    const userId = req.user.id;
+    // Use the user ID to fetch user details from the database
+    const user = await SearchUserForAccessIdDB(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const {access_id} = user[0];
+
+
+
+    const AllDataKeuangan = await GetAllDataKeuanganToDBPenerima(access_id)
+
+    if (AllDataKeuangan) {
+      res.status(200).send({ msg: "Query Successfully", data: AllDataKeuangan });
+    } else {
+      throw new Error("failed to get fetch from Database");
+    }
+
+
+    
+  } catch (error) {
+    res.status(500).send({msg:`${error.message}`})
+    
+  }
+}
+const GetDataKeuangan = async (req,res)=>{
+  try {
+
+    const userId = req.user.id;
+    // Use the user ID to fetch user details from the database
+    const user = await SearchUserForAccessIdDB(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const {access_id} = user[0];
+
+    const {id} = req.params
+
+
+    const AllDataKeuangan = await GetDataKeuanganToDB(access_id,id)
+
+    if (AllDataKeuangan) {
+      res.status(200).send({ msg: "Query Successfully", data: AllDataKeuangan });
+    } else {
+      throw new Error("failed to get fetch from Database");
+    }
+
+
+    
+  } catch (error) {
+    res.status(500).send({msg:`${error.message}`})
+    
+  }
+}
+const GetDataKeuanganPenerima = async (req,res)=>{
+  try {
+
+    const userId = req.user.id;
+    // Use the user ID to fetch user details from the database
+    const user = await SearchUserForAccessIdDB(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const {access_id} = user[0];
+    const {id} = req.params
+
+
+
+
+    const AllDataKeuangan = await GetDataKeuanganToDBPenerima(access_id,id)
+
+    if (AllDataKeuangan) {
+      res.status(200).send({ msg: "Query Successfully", data: AllDataKeuangan });
+    } else {
+      throw new Error("failed to get fetch from Database");
+    }
+
+
+    
+  } catch (error) {
+    res.status(500).send({msg:`${error.message}`})
+    
+  }
+}
+
+
+const GetStatisticAllDataKeuangan = async (req,res)=>{
+  try {
+
+    const userId = req.user.id;
+    // Use the user ID to fetch user details from the database
+    const user = await SearchUserForAccessIdDB(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const {access_id} = user[0];
+
+
+
+    const StatisticAllDataKeuangan = await GetStatisticAllDataKeuanganToDB(access_id)
+
+    if (StatisticAllDataKeuangan) {
+      res.status(200).send({ msg: "Query Successfully", data: StatisticAllDataKeuangan });
+    } else {
+      throw new Error("failed to get fetch from Database");
+    }
+
+
+    
+  } catch (error) {
+    res.status(500).send({msg:`${error.message}`})
+    
+  }
+}
+module.exports = { 
+  AddAlurKeuangan,
+  VerifyAlurKeuangan,
+  GetAllDataKeuangan,
+  GetStatisticAllDataKeuangan,
+  GetAllDataKeuanganPenerima,
+  GetDataKeuangan,
+  GetDataKeuanganPenerima
+ };

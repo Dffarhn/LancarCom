@@ -1,12 +1,13 @@
 const { Router } = require("express");
 
 const { RegisterUser, LoginUser } = require("./UserRoute");
-const { GetDompet } = require("./DompetAuth");
+const { GetDompet, GetStatisticDompet } = require("./DompetAuth");
 const { Auth_Access } = require("../middleware/AccessRoute");
-const { AddAlurKeuangan, VerifyAlurKeuangan } = require("./DataKeuanganAuth");
+const { AddAlurKeuangan, VerifyAlurKeuangan, GetAllDataKeuangan, GetStatisticAllDataKeuangan, GetAllDataKeuanganPenerima, GetDataKeuangan, GetDataKeuanganPenerima } = require("./DataKeuanganAuth");
 const { GetAllDaerahAccessId, AddRequestAccessId } = require("./AccessIdRoute");
 const { AddReviewUser, GetReviewUser } = require("./ReviewRoute");
-
+const { AddPostUser } = require("./PostRoute");
+const { GetAllPembangunan, GetPembangunan, AddPembangunan, UpdatePembangunan } = require("./PembangunansRoute");
 const route = Router();
 
 route.get("/", (req, res) => {
@@ -19,7 +20,8 @@ route.post("/register", RegisterUser);
 
 
 //endpoint for dompet
-route.get("/dompet/:access_id",GetDompet)
+route.get("/dompet/",Auth_Access,GetDompet)
+route.get("/statistic/dompet",Auth_Access,GetStatisticDompet)
 // route.patch("/dompet/:access_id")
 
 
@@ -31,14 +33,33 @@ route.post("/request/access_id",Auth_Access,AddRequestAccessId)
 
 
 //post data_keuangan
+route.get("/data/pemberi/keuangans",Auth_Access,GetAllDataKeuangan)
+route.get("/data/pemberi/keuangan/:id",Auth_Access,GetDataKeuangan)
+route.get("/data/penerima/keuangans",Auth_Access,GetAllDataKeuanganPenerima)
+route.get("/data/penerima/keuangan/:id",Auth_Access,GetDataKeuanganPenerima)
+
+route.get("/statistic/keuangans", Auth_Access,GetStatisticAllDataKeuangan)
+
+
 route.post("/add/alur/keuangan",Auth_Access,AddAlurKeuangan)
 route.patch("/verify/alur/keuangan/:id",Auth_Access,VerifyAlurKeuangan)
+
+//Pembangunans
+route.get("/pembangunans/", Auth_Access,GetAllPembangunan )
+route.get("/pembangunan/:pembangunan_id",Auth_Access,GetPembangunan)
+
+route.post("/pembangunan",Auth_Access, AddPembangunan)
+route.patch("/pembangunan/:pembangunan_id",Auth_Access,UpdatePembangunan)
 
 
 
 //Review User
-
 route.get("/review",Auth_Access,GetReviewUser)
 route.post("/review",Auth_Access,AddReviewUser)
+
+
+//Post User
+
+route.post("/post",Auth_Access,AddPostUser)
 
 module.exports = { route };
