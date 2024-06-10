@@ -31,6 +31,8 @@ const LoginUser = async (req, res) => {
         });
   
         searchingUser.accessToken = accessToken;
+        searchingUser.password = undefined
+        searchingUser.access_id = undefined
   
         res.status(200).send({ msg: "Login successful", data: searchingUser });
           

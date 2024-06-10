@@ -8,6 +8,7 @@ const { GetAllDaerahAccessId, AddRequestAccessId } = require("./AccessIdRoute");
 const { AddReviewUser, GetReviewUser } = require("./ReviewRoute");
 const { AddPostUser } = require("./PostRoute");
 const { GetAllPembangunan, GetPembangunan, AddPembangunan, UpdatePembangunan } = require("./PembangunansRoute");
+const { getProgressPembangunan, getAllProgressPembangunan, AddProgressPembangunan } = require("./ProgressPembangunanRoute");
 const route = Router();
 
 route.get("/", (req, res) => {
@@ -59,7 +60,12 @@ route.post("/review",Auth_Access,AddReviewUser)
 
 
 //Post User
-
 route.post("/post",Auth_Access,AddPostUser)
+
+
+//Progress_Pembangunan
+route.get("/progres/pembangunans",Auth_Access,getAllProgressPembangunan)
+route.get("/progres/pembangunan/:id",Auth_Access,getProgressPembangunan)
+route.post("/progres/pembangunan",Auth_Access,AddProgressPembangunan)
 
 module.exports = { route };
