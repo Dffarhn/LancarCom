@@ -1,15 +1,59 @@
 const pool = require("../../db_connect");
 const { validatorUUID } = require("../function/Validator");
+const { UpdateDompetAuthDB } = require("./DompetAuth");
+const { UpdatePembangunanToDB } = require("./Pembangunan");
 
 async function AddProgressPembangunanToDB(data) {
   try {
-    const { id_pembangunan, image_progress, progress_pembangunan, dana_digunakan } = data;
+    const { id_pembangunan, image_progress, progress_pembangunan, dana_digunakan, access_id } = data;
+    const DateCreate = new Date();
+    const GetUpToDateProgress = await GetAllProgressPembangunanToDB(access_id)
+    
 
-    const queryValues = [id_pembangunan, image_progress, progress_pembangunan, dana_digunakan];
+    const filteredProgress = GetUpToDateProgress.filter(progress => progress.id_pembangunan === id_pembangunan);
+    
+    const DanaSisa = BigInt(filteredProgress[0].dana_sisa, 10) - BigInt(dana_digunakan);
+
+    
+    const queryValues = [id_pembangunan, image_progress, progress_pembangunan, dana_digunakan, DanaSisa, DateCreate];
+    const queryText = `
+      INSERT INTO public.progress_pembangunan(
+        id_pembangunan, image_progress, progress_pembangunan, dana_digunakan, dana_sisa, created_at)
+        VALUES ($1, $2, $3, $4, $5, $6)
+      RETURNING id, dana_digunakan;
+    `;
+
+    const { rows } = await pool.query(queryText, queryValues);
+
+    if (!rows) {
+      throw new Error("Failed to insert data into Database");
+    }
+
+    if (parseInt(progress_pembangunan, 10) === 100) {
+      const updateData = {
+        id: id_pembangunan,
+        status_pembangunan: "completed",
+      };
+
+      await UpdatePembangunanToDB(updateData);
+    }
+
+    
+    const dataUpdateDompet = {
+
+      access_id: access_id,
+      uang_keluar: rows[0].dana_digunakan,
+      tanggal_update: new Date()
+    }
+
+    await UpdateDompetAuthDB(dataUpdateDompet)
+
+    return rows;
   } catch (error) {
-    throw new Error(`${error.message}`);
+    throw new Error(`Error in AddProgressPembangunanToDB: ${error.message}`);
   }
 }
+
 
 async function GetProgressPembangunanToDB(data, access_id) {
   try {

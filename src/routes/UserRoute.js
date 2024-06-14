@@ -13,11 +13,13 @@ const LoginUser = async (req, res) => {
       }
   
       const searchingUser = await SearchUser(data)
+
+      // console.log(searchingUser)
   
       if (searchingUser) {
-        const payload = { id: searchingUser.id, username: searchingUser.username, email: searchingUser.email };
+        const payload = { id: searchingUser.id, username: searchingUser.username, email: searchingUser.email, role: searchingUser.role||undefined };
         const accessToken = jwt.sign(payload, process.env.SECRET_KEY_TOKEN, {
-          expiresIn: "10m",
+          expiresIn: "1d",
         });
         const refreshToken = jwt.sign(payload, process.env.SECRET_KEY_REFRESH_TOKEN, {
           expiresIn: "1d",
@@ -29,7 +31,7 @@ const LoginUser = async (req, res) => {
           secure: true,
           maxAge: 24 * 60 * 60 * 1000,
         });
-  
+      
         searchingUser.accessToken = accessToken;
         searchingUser.password = undefined
         searchingUser.access_id = undefined

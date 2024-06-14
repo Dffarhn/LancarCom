@@ -85,20 +85,37 @@ async function check_emailToDB(email) {
         const { rows } = await pool.query(queryText, values);
         console.log(rows[0])
         if (rows[0]) {
-            const userDBpassword = rows[0].password;
-            console.log(userDBpassword)
+          const userDBpassword = rows[0].password;
+          // console.log(rows[0]);
+      
+          const checksamepassword = await comparePasswordBcrypt(password, userDBpassword);
+          console.log(checksamepassword);
+          if (checksamepassword) {
+              // Check if the user has an access_id
+              if (rows[0].access_id) {
+                 console.log(rows[0].access_id)
+                  // Fetch the role based on access_id
+                  const accessRows = await pool.query('SELECT * FROM access_id WHERE id = $1', [rows[0].access_id]);
+                  // console.log(accessRows.rows[0].role)
+                  if (accessRows.rows.length > 0) {
+                      // Assuming you want to add the role to the user object before returning it
+                      rows[0].role = accessRows.rows[0].role;
+                      console.log(rows[0])
+                      return rows[0]; // Return the user object (with role if applicable)
 
-            const checksamepassword = await comparePasswordBcrypt(password, userDBpassword);
-            console.log(checksamepassword)
-            if (checksamepassword) {
-                return rows[0]; // Return the user object if password is correct
-            } else {
-                throw new Error("Incorrect password");
-            }
-            
-        } else {
-            throw new Error("No account found with that email");
-        }
+                  }else{
+                      console.log(rows[0])
+                      return rows[0]; // Return the user object (with role if applicable)
+                  }
+              }
+       
+          } else {
+              throw new Error("Incorrect password");
+          }
+      } else {
+          throw new Error("No account found with that email");
+      }
+      
     } catch (error) {
         throw new Error(error.message);
     }

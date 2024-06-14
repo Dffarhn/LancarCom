@@ -1,5 +1,6 @@
 const pool = require("../../db_connect");
 const { validatorUUID } = require("../function/Validator");
+const { UpdateDompetAuthDB } = require("./DompetAuth");
 
 async function getAlurKeuangan(id) {
   try {
@@ -76,9 +77,9 @@ async function AddAlurKeuanganDB(data, user) {
   }
 }
 
-async function VerifyAlurKeuanganDB(data, user, id) {
+async function VerifyAlurKeuanganDB(data, user) {
   try {
-    const { uang_diterima } = data;
+    const { uang_diterima, id } = data;
 
     const { access_id } = user;
 
@@ -110,6 +111,18 @@ async function VerifyAlurKeuanganDB(data, user, id) {
 `;
 
     const { rows } = await pool.query(queryText, queryValues);
+
+
+    const dataUpdateDompet = {
+
+      access_id: access_id,
+      uang_masuk: rows[0].uang_diterima,
+      tanggal_update: new Date()
+
+
+    }
+
+    await UpdateDompetAuthDB(dataUpdateDompet)
 
     return rows;
   } catch (error) {
@@ -259,14 +272,85 @@ async function GetDataKeuanganToDBPenerima(access_id,id) {
   }
   
 }
-async function GetStatisticAllDataKeuanganToDB(access_id) {
+async function GetStatisticAllDataKeuanganToDB(access_id,query) {
+  try {
+    const validasiUUID = validatorUUID(access_id)
+
+    const {month,year} = query
+
+    console.log(month,year)
+    const queryText = `
+    WITH grouped_data AS (
+    SELECT
+        EXTRACT(YEAR FROM tgl_turunan) AS year,
+        EXTRACT(MONTH FROM tgl_turunan) AS month,
+        status,
+        COUNT(*) AS count
+    FROM
+        data_keuangan
+    WHERE
+        pemberi = $1
+        AND EXTRACT(YEAR FROM tgl_turunan) = $3
+        AND EXTRACT(MONTH FROM tgl_turunan) = $2
+    GROUP BY
+        year, month, status
+    )
+    SELECT
+        year,
+        month,
+        json_agg(json_build_object('status', status, 'count', count)) AS statuses
+    FROM
+        grouped_data
+    GROUP BY
+        year, month
+    ORDER BY
+        year, month;
+
+    `
+
+    if (validasiUUID) {
+      const {rows} = await pool.query(queryText,[access_id,month,year])
+
+      if (rows) {
+        return rows
+        
+      }else{
+        throw new Error("failed to fetch database")
+      }
+      
+    }else{
+      throw new Error("Your Data Is not Valid")
+    }
+    
+  } catch (error) {
+
+    throw new Error(`${error.message}`)
+    
+  }
+  
+}
+async function GetStatisticAllMonthDataKeuanganToDB(access_id) {
   try {
     const validasiUUID = validatorUUID(access_id)
     const queryText = `
-     SELECT status, COUNT(*) as count
-      FROM data_keuangan
-      WHERE pemberi = $1
-      GROUP BY status;
+WITH grouped_data AS (
+    SELECT
+        EXTRACT(YEAR FROM tgl_turunan) AS year,
+        EXTRACT(MONTH FROM tgl_turunan) AS month
+    FROM
+        data_keuangan
+    WHERE
+        pemberi = $1
+    GROUP BY
+        year, month
+)
+SELECT
+    year,
+    month
+FROM
+    grouped_data
+ORDER BY
+    year DESC, month DESC;
 
     `
 
@@ -302,5 +386,6 @@ module.exports = {
   GetStatisticAllDataKeuanganToDB,
   GetAllDataKeuanganToDBPenerima,
   GetDataKeuanganToDB,
-  GetDataKeuanganToDBPenerima
+  GetDataKeuanganToDBPenerima,
+  GetStatisticAllMonthDataKeuanganToDB
 };

@@ -3,12 +3,13 @@ const { Router } = require("express");
 const { RegisterUser, LoginUser } = require("./UserRoute");
 const { GetDompet, GetStatisticDompet } = require("./DompetAuth");
 const { Auth_Access } = require("../middleware/AccessRoute");
-const { AddAlurKeuangan, VerifyAlurKeuangan, GetAllDataKeuangan, GetStatisticAllDataKeuangan, GetAllDataKeuanganPenerima, GetDataKeuangan, GetDataKeuanganPenerima } = require("./DataKeuanganAuth");
+const { AddAlurKeuangan, VerifyAlurKeuangan, GetAllDataKeuangan, GetStatisticAllDataKeuangan, GetAllDataKeuanganPenerima, GetDataKeuangan, GetDataKeuanganPenerima, GetStatisticAllMonthDataKeuangan } = require("./DataKeuanganAuth");
 const { GetAllDaerahAccessId, AddRequestAccessId } = require("./AccessIdRoute");
 const { AddReviewUser, GetReviewUser } = require("./ReviewRoute");
 const { AddPostUser } = require("./PostRoute");
 const { GetAllPembangunan, GetPembangunan, AddPembangunan, UpdatePembangunan } = require("./PembangunansRoute");
 const { getProgressPembangunan, getAllProgressPembangunan, AddProgressPembangunan } = require("./ProgressPembangunanRoute");
+const { AskAIRoute } = require("./AskAIRoute");
 const route = Router();
 
 route.get("/", (req, res) => {
@@ -21,7 +22,7 @@ route.post("/register", RegisterUser);
 
 
 //endpoint for dompet
-route.get("/dompet/",Auth_Access,GetDompet)
+route.get("/dompet",Auth_Access,GetDompet)
 route.get("/statistic/dompet",Auth_Access,GetStatisticDompet)
 // route.patch("/dompet/:access_id")
 
@@ -40,6 +41,8 @@ route.get("/data/penerima/keuangans",Auth_Access,GetAllDataKeuanganPenerima)
 route.get("/data/penerima/keuangan/:id",Auth_Access,GetDataKeuanganPenerima)
 
 route.get("/statistic/keuangans", Auth_Access,GetStatisticAllDataKeuangan)
+
+route.get("/statistic/keuangans/month",Auth_Access,GetStatisticAllMonthDataKeuangan)
 
 
 route.post("/add/alur/keuangan",Auth_Access,AddAlurKeuangan)
@@ -66,6 +69,10 @@ route.post("/post",Auth_Access,AddPostUser)
 //Progress_Pembangunan
 route.get("/progres/pembangunans",Auth_Access,getAllProgressPembangunan)
 route.get("/progres/pembangunan/:id",Auth_Access,getProgressPembangunan)
-route.post("/progres/pembangunan",Auth_Access,AddProgressPembangunan)
+route.post("/progres/pembangunan/:pembangunan_id",Auth_Access,AddProgressPembangunan)
+
+
+//
+route.post("/askAi", Auth_Access, AskAIRoute)
 
 module.exports = { route };

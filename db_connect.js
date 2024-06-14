@@ -20,5 +20,10 @@ pool.connect((err, client, release) => {
   release(); // Melepaskan koneksi
 });
 
+
+
 // Export pool untuk digunakan di aplikasi Express.js
 module.exports = pool;
+
+
+

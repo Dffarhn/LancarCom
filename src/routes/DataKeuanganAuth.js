@@ -1,5 +1,5 @@
 const { validateRequestBody } = require("../function/Validator");
-const { SearchUserForAccessIdDB, AddAlurKeuanganDB, VerifyAlurKeuanganDB, GetAllDataKeuanganToDB, GetStatisticAllDataKeuanganToDB, GetAllDataKeuanganToDBPenerima, GetDataKeuanganToDB, GetDataKeuanganToDBPenerima } = require("../model/DataKeuanganModel");
+const { SearchUserForAccessIdDB, AddAlurKeuanganDB, VerifyAlurKeuanganDB, GetAllDataKeuanganToDB, GetStatisticAllDataKeuanganToDB, GetAllDataKeuanganToDBPenerima, GetDataKeuanganToDB, GetDataKeuanganToDBPenerima, GetStatisticAllMonthDataKeuanganToDB } = require("../model/DataKeuanganModel");
 const { GetDompetAuthDB, UpdateDompetAuthDB } = require("../model/DompetAuth");
 
 const AddAlurKeuangan = async (req, res) => {
@@ -54,27 +54,16 @@ const VerifyAlurKeuangan = async (req, res) => {
       throw new Error("Incomplete data provided.");
     }
 
-    const VerifyAlurKeuangan = await VerifyAlurKeuanganDB(data, user[0], id);
+    data.id = id
+
+    const VerifyAlurKeuangan = await VerifyAlurKeuanganDB(data, user[0]);
 
     if (!VerifyAlurKeuangan[0].id) {
-      res.status(500).json({ message: `Failed to Add Alur Keuangan ke database` });
+      res.status(500).json({ message: `Failed to verify Alur Keuangan ke database` });
     }
-
-    const UpdateToSPesificDompet = await GetDompetAuthDB(user[0].access_id)
-
-    const datatoupdate = {
-      access_id: user[0].access_id,
-      uang_masuk: VerifyAlurKeuangan[0].uang_diterima,
-      uang_sekarang: UpdateToSPesificDompet[0].uang_sekarang + VerifyAlurKeuangan[0].uang_diterima,
-      tanggal_update: new Date(),
-    }
-
-    const UpdateDompet = UpdateDompetAuthDB(datatoupdate)
-
-    if (UpdateDompet) {
       
-      res.status(200).json({ message: "Alur Keuangan Verify successfully" });
-    }
+    res.status(200).json({ message: "Alur Keuangan Verify successfully" });
+    
 
     // Respond with success message
   } catch (error) {
@@ -216,9 +205,34 @@ const GetStatisticAllDataKeuangan = async (req,res)=>{
 
     const {access_id} = user[0];
 
+    const StatisticAllDataKeuangan = await GetStatisticAllDataKeuanganToDB(access_id,req.query)
+
+    if (StatisticAllDataKeuangan) {
+      res.status(200).send({ msg: "Query Successfully", data: StatisticAllDataKeuangan });
+    } else {
+      throw new Error("failed to get fetch from Database");
+    }
 
 
-    const StatisticAllDataKeuangan = await GetStatisticAllDataKeuanganToDB(access_id)
+    
+  } catch (error) {
+    res.status(500).send({msg:`${error.message}`})
+    
+  }
+}
+const GetStatisticAllMonthDataKeuangan = async (req,res)=>{
+  try {
+
+    const userId = req.user.id;
+    // Use the user ID to fetch user details from the database
+    const user = await SearchUserForAccessIdDB(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const {access_id} = user[0];
+
+    const StatisticAllDataKeuangan = await GetStatisticAllMonthDataKeuanganToDB(access_id)
 
     if (StatisticAllDataKeuangan) {
       res.status(200).send({ msg: "Query Successfully", data: StatisticAllDataKeuangan });
@@ -240,5 +254,6 @@ module.exports = {
   GetStatisticAllDataKeuangan,
   GetAllDataKeuanganPenerima,
   GetDataKeuangan,
-  GetDataKeuanganPenerima
+  GetDataKeuanganPenerima,
+  GetStatisticAllMonthDataKeuangan
  };
