@@ -130,42 +130,56 @@ async function VerifyAlurKeuanganDB(data, user) {
   }
 }
 
-
-
-async function GetAllDataKeuanganToDB(access_id) {
+async function GetTotalDataCount(access_id) {
   try {
-    const validasiUUID = validatorUUID(access_id)
+    const validasiUUID = validatorUUID(access_id);
+    const countQuery = `
+      SELECT COUNT(*)
+      FROM data_keuangan dk
+      WHERE dk.pemberi = $1;
+    `;
+
+    if (validasiUUID) {
+      const { rows } = await pool.query(countQuery, [access_id]);
+      return { count: parseInt(rows[0].count) };
+    } else {
+      throw new Error("Your Data is not valid");
+    }
+  } catch (error) {
+    throw new Error(`${error.message}`);
+  }
+}
+
+async function GetAllDataKeuanganToDB(access_id, limit, offset) {
+  try {
+    const validasiUUID = validatorUUID(access_id);
     const queryText = `
       SELECT dk.*, 
-            penerima_access.asal_daerah AS penerima_name, 
-            pemberi_access.asal_daerah AS pemberi_name
+        penerima_access.asal_daerah AS penerima_name, 
+        pemberi_access.asal_daerah AS pemberi_name
       FROM data_keuangan dk
       JOIN access_id penerima_access ON dk.penerima = penerima_access.id
       JOIN access_id pemberi_access ON dk.pemberi = pemberi_access.id
-      WHERE dk.pemberi = $1;
-    `
+      WHERE dk.pemberi = $1
+      LIMIT $2 OFFSET $3;
+    `;
 
     if (validasiUUID) {
-      const {rows} = await pool.query(queryText,[access_id])
+      const { rows } = await pool.query(queryText, [access_id, limit, offset]);
 
       if (rows) {
-        return rows
-        
-      }else{
-        throw new Error("failed to fetch database")
+        return rows;
+      } else {
+        throw new Error("Failed to fetch from database");
       }
-      
-    }else{
-      throw new Error("Your Data Is not Valid")
+    } else {
+      throw new Error("Your Data is not valid");
     }
-    
   } catch (error) {
-
-    throw new Error(`${error.message}`)
-    
+    throw new Error(`${error.message}`);
   }
-  
 }
+
 
 async function GetAllDataKeuanganToDBPenerima(access_id) {
   try {
@@ -387,5 +401,6 @@ module.exports = {
   GetAllDataKeuanganToDBPenerima,
   GetDataKeuanganToDB,
   GetDataKeuanganToDBPenerima,
-  GetStatisticAllMonthDataKeuanganToDB
+  GetStatisticAllMonthDataKeuanganToDB,
+  GetTotalDataCount
 };

@@ -1,5 +1,5 @@
 const { validateRequestBody } = require("../function/Validator");
-const { SearchUserForAccessIdDB, AddAlurKeuanganDB, VerifyAlurKeuanganDB, GetAllDataKeuanganToDB, GetStatisticAllDataKeuanganToDB, GetAllDataKeuanganToDBPenerima, GetDataKeuanganToDB, GetDataKeuanganToDBPenerima, GetStatisticAllMonthDataKeuanganToDB } = require("../model/DataKeuanganModel");
+const { SearchUserForAccessIdDB, AddAlurKeuanganDB, VerifyAlurKeuanganDB, GetAllDataKeuanganToDB, GetStatisticAllDataKeuanganToDB, GetAllDataKeuanganToDBPenerima, GetDataKeuanganToDB, GetDataKeuanganToDBPenerima, GetStatisticAllMonthDataKeuanganToDB, GetTotalDataCount } = require("../model/DataKeuanganModel");
 const { GetDompetAuthDB, UpdateDompetAuthDB } = require("../model/DompetAuth");
 
 const AddAlurKeuangan = async (req, res) => {
@@ -72,8 +72,11 @@ const VerifyAlurKeuangan = async (req, res) => {
 };
 
 
-const GetAllDataKeuangan = async (req,res)=>{
+const GetAllDataKeuangan = async (req, res) => {
   try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const offset = (page - 1) * limit;
 
     const userId = req.user.id;
     // Use the user ID to fetch user details from the database
@@ -82,25 +85,28 @@ const GetAllDataKeuangan = async (req,res)=>{
       return res.status(404).json({ message: "User not found" });
     }
 
-    const {access_id} = user[0];
+    const { access_id } = user[0];
 
+    // Fetch the total data count for pagination
+    const totalDataCountResult = await GetTotalDataCount(access_id);
+    const totalDataCount = totalDataCountResult.count;
 
+    const allDataKeuangan = await GetAllDataKeuanganToDB(access_id, limit, offset);
 
-    const AllDataKeuangan = await GetAllDataKeuanganToDB(access_id)
-
-    if (AllDataKeuangan) {
-      res.status(200).send({ msg: "Query Successfully", data: AllDataKeuangan });
+    if (allDataKeuangan) {
+      res.status(200).send({
+        msg: "Query Successfully",
+        data: allDataKeuangan,
+        currentPage: page,
+        totalPages: Math.ceil(totalDataCount / limit),
+      });
     } else {
-      throw new Error("failed to get fetch from Database");
+      throw new Error("Failed to fetch from Database");
     }
-
-
-    
   } catch (error) {
-    res.status(500).send({msg:`${error.message}`})
-    
+    res.status(500).send({ msg: `${error.message}` });
   }
-}
+};
 const GetAllDataKeuanganPenerima = async (req,res)=>{
   try {
 
