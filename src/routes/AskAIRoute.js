@@ -25,8 +25,8 @@ const AskAIRoute = async (req, res) => {
         // Wait for all the promises to resolve
         const ToAI = await Promise.all(
             GetPostEachidArray.map(async (post, index) => {
-                await new Promise(resolve => setTimeout(resolve, index * 2000)); // 2 seconds delay
-                const AskAI = await AskAiChat("City Name: " + `${post.id} \n Review for city ${post.id}: ` + formatReviews(post.reviews) +"\n Give Your Analyze about this city from the review that u have get, i please do honestly explain in bahasa indonesia ");
+                await new Promise(resolve => setTimeout(resolve, index * 1000)); // 2 seconds delay
+                const AskAI = await AskAiChat(`City Name: ${post.id} \n Review for ${post.id}: ${formatReviews(post.reviews)} \n Give Your Analyze about this city from the review that u have get, i please do honestly explain in bahasa indonesia and output with your output formatted`);
                 return {
                     id: post.id,
                     rekomendasi_ai: AskAI
