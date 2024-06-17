@@ -34,9 +34,9 @@ async function getGroqChatCompletion(content) {
           Our ultimate aim is to contribute to the vision of Indonesia Emas 2045.
           You will analyze the good or bad of a city based on provided reviews and produce an output as 
           follows:
-          Nama Kota: (City Name)
-          Kondisi: (Should u give on percent 0-100%)
-          Alasan:(the reasen why you give the condition percentage)  
+          Nama Kota: (City Name),
+          Kondisi: (Should u give on percent 0-100%),
+          Alasan:(the reasen why you give the condition percentage),
           Rekomendasi: (Your Recomendation) `
         },
         {
@@ -56,7 +56,36 @@ async function getGroqChatCompletion(content) {
   }
 }
 
+
+function KelolaRekomendasiText(text) {
+  // Split the text by '\n' to get an array of lines
+  const lines = text.split('\n');
+
+  // Initialize an object to store the extracted information
+  const rekomendasiInfo = {};
+
+  // Iterate through each line and extract the relevant information
+  lines.forEach(line => {
+    if (line.startsWith('Nama Kota:')) {
+      rekomendasiInfo.rekomendasiKe = line.split(': ')[1];
+    } else if (line.startsWith('Kondisi:')) {
+      // Parse the percentage value as a number
+      const kondisiString = line.split(': ')[1].replace('%', '');
+      rekomendasiInfo.kondisi = parseInt(kondisiString, 10);
+    } else if (line.startsWith('Alasan:')) {
+      rekomendasiInfo.alasan = line.split(': ')[1];
+    } else if (line.startsWith('Rekomendasi:')) {
+      rekomendasiInfo.rekomendasiAi = line.split(': ')[1];
+    }
+  });
+
+  // Return the extracted information object
+  return rekomendasiInfo;
+}
+
+
 module.exports = {
-  AskAiChat
+  AskAiChat,
+  KelolaRekomendasiText
 }
 // AskAiChat("Halo Kamu siapa?")

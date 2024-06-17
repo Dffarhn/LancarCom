@@ -1,5 +1,5 @@
 const { validateRequestBody } = require("../function/Validator");
-const { SearchUserForAccessIdDB, AddAlurKeuanganDB, VerifyAlurKeuanganDB, GetAllDataKeuanganToDB, GetStatisticAllDataKeuanganToDB, GetAllDataKeuanganToDBPenerima, GetDataKeuanganToDB, GetDataKeuanganToDBPenerima, GetStatisticAllMonthDataKeuanganToDB, GetTotalDataCount } = require("../model/DataKeuanganModel");
+const { SearchUserForAccessIdDB, AddAlurKeuanganDB, VerifyAlurKeuanganDB, GetAllDataKeuanganToDB, GetStatisticAllDataKeuanganToDB, GetAllDataKeuanganToDBPenerima, GetDataKeuanganToDB, GetDataKeuanganToDBPenerima, GetStatisticAllMonthDataKeuanganToDB, GetTotalDataCount, GetTotalDataPenerimaCount } = require("../model/DataKeuanganModel");
 const { GetDompetAuthDB, UpdateDompetAuthDB } = require("../model/DompetAuth");
 
 const AddAlurKeuangan = async (req, res) => {
@@ -110,6 +110,10 @@ const GetAllDataKeuangan = async (req, res) => {
 const GetAllDataKeuanganPenerima = async (req,res)=>{
   try {
 
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const offset = (page - 1) * limit;
+
     const userId = req.user.id;
     // Use the user ID to fetch user details from the database
     const user = await SearchUserForAccessIdDB(userId);
@@ -119,12 +123,21 @@ const GetAllDataKeuanganPenerima = async (req,res)=>{
 
     const {access_id} = user[0];
 
+    // Fetch the total data count for pagination
+    const totalDataCountResult = await GetTotalDataPenerimaCount(access_id);
+    const totalDataCount = totalDataCountResult.count;
 
 
-    const AllDataKeuangan = await GetAllDataKeuanganToDBPenerima(access_id)
+
+    const AllDataKeuangan = await GetAllDataKeuanganToDBPenerima(access_id,limit,offset)
 
     if (AllDataKeuangan) {
-      res.status(200).send({ msg: "Query Successfully", data: AllDataKeuangan });
+      res.status(200).send({
+        msg: "Query Successfully",
+        data: AllDataKeuangan,
+        currentPage: page,
+        totalPages: Math.ceil(totalDataCount / limit),
+      });
     } else {
       throw new Error("failed to get fetch from Database");
     }

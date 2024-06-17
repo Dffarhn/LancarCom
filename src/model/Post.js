@@ -34,7 +34,8 @@ async function GetPostFromAccessId(access_ids) {
     // Construct the query text
     const queryText = `
         SELECT 
-            access_id.asal_daerah AS id,
+            access_id.id AS id,
+            access_id.asal_daerah AS nama_daerah,
             json_agg(review.isi_review) AS reviews
         FROM 
             public.access_id

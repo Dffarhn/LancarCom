@@ -1,5 +1,5 @@
 const { AskAiChat } = require("../function/AICHAT");
-const { GetTheChild } = require("../model/AskAI");
+const { GetTheChild, AddRekomendasiToDB } = require("../model/AskAI");
 const { SearchUserForAccessIdDB } = require("../model/DataKeuanganModel");
 const { GetPostFromAccessId } = require("../model/Post");
 
@@ -26,9 +26,19 @@ const AskAIRoute = async (req, res) => {
         const ToAI = await Promise.all(
             GetPostEachidArray.map(async (post, index) => {
                 await new Promise(resolve => setTimeout(resolve, index * 1000)); // 2 seconds delay
-                const AskAI = await AskAiChat(`City Name: ${post.id} \n Review for ${post.id}: ${formatReviews(post.reviews)} \n Give Your Analyze about this city from the review that u have get, i please do honestly explain in bahasa indonesia and output with your output formatted`);
+                const AskAI = await AskAiChat(`City Name: ${post.nama_daerah} \n Review for ${post.nama_daerah}: ${formatReviews(post.reviews)} \n Give Your Analyze about this city from the review that u have get, i please do honestly explain in bahasa indonesia and output with your output formatted`);
+                
+                const dataDB = {
+                    id: post.id,
+                    nama_daerah: post.nama_daerah,
+                    rekomendasi_ai: AskAI
+                }
+
+                const AddDataToDB = await AddRekomendasiToDB(dataDB)
+                
                 return {
                     id: post.id,
+                    nama_daerah: post.nama_daerah,
                     rekomendasi_ai: AskAI
                 };
             })

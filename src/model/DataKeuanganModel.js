@@ -149,6 +149,25 @@ async function GetTotalDataCount(access_id) {
     throw new Error(`${error.message}`);
   }
 }
+async function GetTotalDataPenerimaCount(access_id) {
+  try {
+    const validasiUUID = validatorUUID(access_id);
+    const countQuery = `
+      SELECT COUNT(*)
+      FROM data_keuangan dk
+      WHERE dk.penerima = $1;
+    `;
+
+    if (validasiUUID) {
+      const { rows } = await pool.query(countQuery, [access_id]);
+      return { count: parseInt(rows[0].count) };
+    } else {
+      throw new Error("Your Data is not valid");
+    }
+  } catch (error) {
+    throw new Error(`${error.message}`);
+  }
+}
 
 async function GetAllDataKeuanganToDB(access_id, limit, offset) {
   try {
@@ -181,7 +200,7 @@ async function GetAllDataKeuanganToDB(access_id, limit, offset) {
 }
 
 
-async function GetAllDataKeuanganToDBPenerima(access_id) {
+async function GetAllDataKeuanganToDBPenerima(access_id,limit,offset) {
   try {
     const validasiUUID = validatorUUID(access_id)
     const queryText = `
@@ -191,11 +210,12 @@ async function GetAllDataKeuanganToDBPenerima(access_id) {
       FROM data_keuangan dk
       JOIN access_id penerima_access ON dk.penerima = penerima_access.id
       JOIN access_id pemberi_access ON dk.pemberi = pemberi_access.id
-      WHERE dk.penerima = $1;
+      WHERE dk.penerima = $1
+      LIMIT $2 OFFSET $3;
     `
 
     if (validasiUUID) {
-      const {rows} = await pool.query(queryText,[access_id])
+      const {rows} = await pool.query(queryText,[access_id,limit,offset])
 
       if (rows) {
         return rows
@@ -402,5 +422,6 @@ module.exports = {
   GetDataKeuanganToDB,
   GetDataKeuanganToDBPenerima,
   GetStatisticAllMonthDataKeuanganToDB,
-  GetTotalDataCount
+  GetTotalDataCount,
+  GetTotalDataPenerimaCount
 };
