@@ -141,61 +141,59 @@ async function GetStatisticDompetDB(access_id) {
     const validasiUUID = validatorUUID(access_id)
 
     const queryText =`
-    WITH latest_uang_masuk AS (
-        SELECT DISTINCT ON (EXTRACT(YEAR FROM tanggal_update), EXTRACT(MONTH FROM tanggal_update))
-            EXTRACT(YEAR FROM tanggal_update) AS tahun,
-            EXTRACT(MONTH FROM tanggal_update) AS bulan,
-            uang_masuk,
-            tanggal_update
-        FROM 
-            public.dompet_keuangan
-        WHERE 
-            pemilik_dompet = $1
-            AND uang_masuk IS NOT NULL
-        ORDER BY 
-            EXTRACT(YEAR FROM tanggal_update), EXTRACT(MONTH FROM tanggal_update), tanggal_update DESC
-    ),
-    latest_uang_keluar AS (
-        SELECT DISTINCT ON (EXTRACT(YEAR FROM tanggal_update), EXTRACT(MONTH FROM tanggal_update))
-            EXTRACT(YEAR FROM tanggal_update) AS tahun,
-            EXTRACT(MONTH FROM tanggal_update) AS bulan,
-            uang_keluar,
-            tanggal_update
-        FROM 
-            public.dompet_keuangan
-        WHERE 
-            pemilik_dompet = $1
-            AND uang_keluar IS NOT NULL
-        ORDER BY 
-            EXTRACT(YEAR FROM tanggal_update), EXTRACT(MONTH FROM tanggal_update), tanggal_update DESC
-    ),
-    latest_uang_sekarang AS (
-        SELECT DISTINCT ON (EXTRACT(YEAR FROM tanggal_update), EXTRACT(MONTH FROM tanggal_update))
-            EXTRACT(YEAR FROM tanggal_update) AS tahun,
-            EXTRACT(MONTH FROM tanggal_update) AS bulan,
-            uang_sekarang,
-            tanggal_update
-        FROM 
-            public.dompet_keuangan
-        WHERE 
-            pemilik_dompet = $1
-            AND uang_sekarang IS NOT NULL
-        ORDER BY 
-            EXTRACT(YEAR FROM tanggal_update), EXTRACT(MONTH FROM tanggal_update), tanggal_update DESC
-    )
-    SELECT
-        COALESCE(lum.tahun, luk.tahun, lus.tahun) AS tahun,
-        COALESCE(lum.bulan, luk.bulan, lus.bulan) AS bulan,
-        lum.uang_masuk,
-        luk.uang_keluar,
-        lus.uang_sekarang,
-        GREATEST(lum.tanggal_update, luk.tanggal_update, lus.tanggal_update) AS tanggal_update_terakhir
-    FROM
-        latest_uang_masuk lum
-        FULL JOIN latest_uang_keluar luk ON lum.tahun = luk.tahun AND lum.bulan = luk.bulan
-        FULL JOIN latest_uang_sekarang lus ON lum.tahun = lus.tahun AND lum.bulan = lus.bulan
-    ORDER BY
-        tahun, bulan;
+    WITH monthly_uang_masuk AS (
+    SELECT 
+        EXTRACT(YEAR FROM tanggal_update) AS tahun,
+        EXTRACT(MONTH FROM tanggal_update) AS bulan,
+        SUM(uang_masuk) AS total_uang_masuk
+    FROM 
+        public.dompet_keuangan
+    WHERE 
+        pemilik_dompet = $1
+        AND uang_masuk IS NOT NULL
+    GROUP BY 
+        EXTRACT(YEAR FROM tanggal_update), EXTRACT(MONTH FROM tanggal_update)
+),
+monthly_uang_keluar AS (
+    SELECT 
+        EXTRACT(YEAR FROM tanggal_update) AS tahun,
+        EXTRACT(MONTH FROM tanggal_update) AS bulan,
+        SUM(uang_keluar) AS total_uang_keluar
+    FROM 
+        public.dompet_keuangan
+    WHERE 
+        pemilik_dompet = $1
+        AND uang_keluar IS NOT NULL
+    GROUP BY 
+        EXTRACT(YEAR FROM tanggal_update), EXTRACT(MONTH FROM tanggal_update)
+),
+latest_uang_sekarang AS (
+    SELECT DISTINCT ON (EXTRACT(YEAR FROM tanggal_update), EXTRACT(MONTH FROM tanggal_update))
+        EXTRACT(YEAR FROM tanggal_update) AS tahun,
+        EXTRACT(MONTH FROM tanggal_update) AS bulan,
+        uang_sekarang,
+        tanggal_update
+    FROM 
+        public.dompet_keuangan
+    WHERE 
+        pemilik_dompet = $1
+        AND uang_sekarang IS NOT NULL
+    ORDER BY 
+        EXTRACT(YEAR FROM tanggal_update), EXTRACT(MONTH FROM tanggal_update), tanggal_update DESC
+)
+SELECT
+    COALESCE(mum.tahun, muk.tahun, lus.tahun) AS tahun,
+    COALESCE(mum.bulan, muk.bulan, lus.bulan) AS bulan,
+    mum.total_uang_masuk AS uang_masuk,
+    muk.total_uang_keluar AS uang_keluar,
+    lus.uang_sekarang AS uang_sekarang,
+    lus.tanggal_update AS tanggal_update_terakhir
+FROM
+    monthly_uang_masuk mum
+    FULL JOIN monthly_uang_keluar muk ON mum.tahun = muk.tahun AND mum.bulan = muk.bulan
+    FULL JOIN latest_uang_sekarang lus ON mum.tahun = lus.tahun AND mum.bulan = lus.bulan
+ORDER BY
+    tahun, bulan;
 
     `
 

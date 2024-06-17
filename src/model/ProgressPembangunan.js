@@ -1,19 +1,36 @@
 const pool = require("../../db_connect");
 const { validatorUUID } = require("../function/Validator");
+
 const { UpdateDompetAuthDB } = require("./DompetAuth");
-const { UpdatePembangunanToDB } = require("./Pembangunan");
+const { UpdatePembangunanToDB, getDataPembangunanDB } = require("./Pembangunan");
 
 async function AddProgressPembangunanToDB(data) {
   try {
     const { id_pembangunan, image_progress, progress_pembangunan, dana_digunakan, access_id } = data;
     const DateCreate = new Date();
+
+    let DanaSisa = 0
+
+
     const GetUpToDateProgress = await GetAllProgressPembangunanToDB(access_id)
     
-
     const filteredProgress = GetUpToDateProgress.filter(progress => progress.id_pembangunan === id_pembangunan);
     
-    const DanaSisa = BigInt(filteredProgress[0].dana_sisa, 10) - BigInt(dana_digunakan);
+    if (filteredProgress.length > 0) {
+      const previousDanaSisa = BigInt(filteredProgress[0].dana_sisa || 0);
+      const digunakan = BigInt(dana_digunakan || 0);
+      DanaSisa = previousDanaSisa - digunakan;
+    } else {
+      const GetFirstPembangunan = await getDataPembangunanDB(id_pembangunan, access_id);
 
+      if (GetFirstPembangunan.length > 0) {
+        const danaPembangunan = BigInt(GetFirstPembangunan[0].dana_pembangunan || 0);
+        const digunakan = BigInt(dana_digunakan || 0);
+        DanaSisa = danaPembangunan - digunakan;
+      } else {
+        throw new Error("Pembangunan tidak ditemukan.");
+      }
+    }
     
     const queryValues = [id_pembangunan, image_progress, progress_pembangunan, dana_digunakan, DanaSisa, DateCreate];
     const queryText = `

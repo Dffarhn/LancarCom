@@ -1,3 +1,4 @@
+const { validateRequestBody } = require("../function/Validator");
 const { SearchUserForAccessIdDB } = require("../model/DataKeuanganModel");
 const { GetAllDataPembangunansDB, getDataPembangunanDB, AddDataPembangunanToDB, UpdatePembangunanToDB } = require("../model/Pembangunan");
 
@@ -13,6 +14,7 @@ const AddPembangunan = async (req, res) => {
     const { access_id } = user[0];
 
     const data = req.body;
+    console.log(data)
     const requiredFields = ["nama_pembangunan", "lokasi_pembangunan", "dana_pembangunan"];
 
     const isValidRequest = validateRequestBody(data, requiredFields);
