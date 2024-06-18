@@ -2,6 +2,7 @@ const { AskAiChat, formatReviews } = require("../function/AIchat");
 const { GetTheChild, AddRekomendasiToDB, GetRekomendasiAItoDB } = require("../model/AskAI");
 const { SearchUserForAccessIdDB } = require("../model/DataKeuanganModel");
 const { GetPostFromAccessId } = require("../model/Post");
+const { GetAllRekomendasiAIForSpesificCity } = require("../model/RekomendasiAI");
 
 const ChatAiRoute = async (req, res) => {
   try {
@@ -16,7 +17,26 @@ const ChatAiRoute = async (req, res) => {
 
     const { pesan } = req.body;
 
-    const BalasanAi = await AskAiChat(pesan, "chat");
+    const GetDataAboutCity = await GetPostFromAccessId([access_id])
+    console.log(GetDataAboutCity)
+
+
+    
+
+    const GetAllRekomendasiBefore = await GetAllRekomendasiAIForSpesificCity(access_id)
+    // console.log(GetAllRekomendasiBefore)
+    const RekomendasiBefore = GetAllRekomendasiBefore.map(item => {return item.rekomendasi_ai})
+
+    console.log(RekomendasiBefore)
+
+    const data = {
+      nama_daerah: GetDataAboutCity[0].nama_daerah,
+      pesan: pesan,
+      review: formatReviews(GetDataAboutCity[0].reviews),
+      rekomendasi_before: formatReviews(RekomendasiBefore)
+    }
+
+    const BalasanAi = await AskAiChat(data, "chat");
     res.status(200).send({ msg: "Query Successful", data: BalasanAi });
   } catch (error) {
     res.status(500).json({ message: `${error.message}` });
