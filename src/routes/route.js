@@ -9,7 +9,7 @@ const { AddReviewUser, GetReviewUser } = require("./ReviewRoute");
 const { AddPostUser } = require("./PostRoute");
 const { GetAllPembangunan, GetPembangunan, AddPembangunan, UpdatePembangunan } = require("./PembangunansRoute");
 const { getProgressPembangunan, getAllProgressPembangunan, AddProgressPembangunan } = require("./ProgressPembangunanRoute");
-const { AskAIRoute } = require("./AskAIRoute");
+const { AskAIRoute, getAllRekomendasi, ChatAiRoute } = require("./AskAIRoute");
 const route = Router();
 
 route.get("/", (req, res) => {
@@ -72,7 +72,17 @@ route.get("/progres/pembangunan/:id",Auth_Access,getProgressPembangunan)
 route.post("/progres/pembangunan/:pembangunan_id",Auth_Access,AddProgressPembangunan)
 
 
-//
+//AI ROUTE
 route.post("/askAi", Auth_Access, AskAIRoute)
+
+
+
+
+
+//REKOMENDASI AI
+
+route.get("/rekomendasiAI",Auth_Access, getAllRekomendasi)
+
+route.post("/ChatAI",Auth_Access,ChatAiRoute)
 
 module.exports = { route };
