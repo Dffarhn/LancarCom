@@ -25,7 +25,7 @@ const AddProgressPembangunan = async (req, res) => {
     }
 
     data.access_id = access_id;
-    
+
     // Await the AddProgressPembangunanToDB function call
     const AddDataProgressPembangunan = await AddProgressPembangunanToDB(data);
 
@@ -35,8 +35,7 @@ const AddProgressPembangunan = async (req, res) => {
   }
 };
 
-
-const getProgressPembangunan = async (req,res)=>{
+const getProgressPembangunan = async (req, res) => {
   try {
     const userId = req.user.id;
     const { id } = req.params;
@@ -47,25 +46,18 @@ const getProgressPembangunan = async (req,res)=>{
     }
     const { access_id } = user[0];
 
-
-    const GetProgressPembangunanData = await GetProgressPembangunanToDB(id,access_id)
+    const GetProgressPembangunanData = await GetProgressPembangunanToDB(id, access_id);
 
     if (GetProgressPembangunanData) {
       res.status(200).send({ msg: "Query Successfully", data: GetProgressPembangunanData });
     } else {
       throw new Error("failed to get fetch from Database");
     }
-
-
-
-    
   } catch (error) {
-    res.status(500).send({msg:`${error.message}`})
-    
+    res.status(500).send({ msg: `${error.message}` });
   }
-
-}
-const getAllProgressPembangunan = async (req,res)=>{
+};
+const getAllProgressPembangunan = async (req, res) => {
   try {
     const userId = req.user.id;
     // Use the user ID to fetch user details from the database
@@ -75,8 +67,7 @@ const getAllProgressPembangunan = async (req,res)=>{
     }
     const { access_id } = user[0];
 
-
-    const GetAllProgressPembangunanData = await GetAllProgressPembangunanToDB(access_id)
+    const GetAllProgressPembangunanData = await GetAllProgressPembangunanToDB(access_id);
 
     // console.log(GetAllProgressPembangunanData)
 
@@ -85,21 +76,13 @@ const getAllProgressPembangunan = async (req,res)=>{
     } else {
       throw new Error("failed to get fetch from Database");
     }
-
-
-
-    
   } catch (error) {
-    res.status(500).send({msg:`${error.message}`})
-    
+    res.status(500).send({ msg: `${error.message}` });
   }
-
-}
-
+};
 
 module.exports = {
   AddProgressPembangunan,
   getProgressPembangunan,
-  getAllProgressPembangunan
-
-}
+  getAllProgressPembangunan,
+};

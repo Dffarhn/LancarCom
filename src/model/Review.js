@@ -2,10 +2,10 @@ const pool = require("../../db_connect");
 const { validateNoSpaces } = require("../function/Validator");
 
 async function GetAllReviewForSpecificUserDB(user) {
-    try {
-      const { access_id } = user;
-  
-      const queryText = `
+  try {
+    const { access_id } = user;
+
+    const queryText = `
             
             SELECT
             p.id AS post_id,
@@ -31,20 +31,20 @@ async function GetAllReviewForSpecificUserDB(user) {
             GROUP BY
                 p.id, u.id;
       `;
-  
-      const queryValues = [access_id];
-  
-      const { rows } = await pool.query(queryText, queryValues);
-  
-      if (!rows || rows.length === 0) {
-          throw new Error("No reviews found for the specified user.");
-      }
-  
-      return rows;
-    } catch (error) {
-      throw new Error(`Error fetching reviews: ${error.message}`);
+
+    const queryValues = [access_id];
+
+    const { rows } = await pool.query(queryText, queryValues);
+
+    if (!rows || rows.length === 0) {
+      throw new Error("No reviews found for the specified user.");
     }
+
+    return rows;
+  } catch (error) {
+    throw new Error(`Error fetching reviews: ${error.message}`);
   }
+}
 
 async function AddReviewUserToDB(data, user) {
   try {

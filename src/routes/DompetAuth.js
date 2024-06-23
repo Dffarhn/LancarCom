@@ -15,7 +15,7 @@ const GetDompet = async (req, res) => {
 
     const GetDataDompet = await GetDompetAuthDB(access_id);
 
-    res.status(200).json({msg:"QuerySuccessfully", data : GetDataDompet});
+    res.status(200).json({ msg: "QuerySuccessfully", data: GetDataDompet });
   } catch (error) {
     // Send an error response with a status code and error message
     res.status(500).json({ message: `Failed to get dompet: ${error.message}` });
@@ -70,11 +70,11 @@ const GetStatisticDompet = async (req, res) => {
       throw new Error("failed to get fetch from Database");
     }
   } catch (error) {
-    res.status(500).send({msg:`${error.message}`})
+    res.status(500).send({ msg: `${error.message}` });
   }
 };
 module.exports = {
   GetDompet,
   // UpdateDompet,
-  GetStatisticDompet
+  GetStatisticDompet,
 };

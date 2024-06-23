@@ -27,5 +27,4 @@ const AddPostUser = async (req, res) => {
   }
 };
 
-
-module.exports= {AddPostUser}
+module.exports = { AddPostUser };

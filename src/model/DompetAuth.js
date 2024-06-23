@@ -2,9 +2,9 @@ const pool = require("../../db_connect");
 const { validateNoSpaces, validateNumber, validatorUUID } = require("../function/Validator");
 
 async function GetDompetAuthDB(id) {
-    try {
-        const queryValues = [id];
-        const queryText = `
+  try {
+    const queryValues = [id];
+    const queryText = `
         WITH latest_uang_masuk AS (
             SELECT uang_masuk, tanggal_update
             FROM public.dompet_keuangan
@@ -41,106 +41,99 @@ async function GetDompetAuthDB(id) {
 
         `;
 
-        const { rows } = await pool.query(queryText, queryValues);
+    const { rows } = await pool.query(queryText, queryValues);
 
-        return rows;
-    } catch (error) {
-        throw new Error(`Failed to get dompet auth: ${error.message}`);
-    }
+    return rows;
+  } catch (error) {
+    throw new Error(`Failed to get dompet auth: ${error.message}`);
+  }
 }
 
-
 async function UpdateDompetAuthDB(data) {
-    try {
-        const updateColumns = [];
-        const values = [];
+  try {
+    const updateColumns = [];
+    const values = [];
 
-        let index = 1;
-        const placeholder = [];
-    
-        Object.keys(data).forEach((key) => {
-          if (key !== "access_id" && key !== "tanggal_update") {
-            if (typeof data[key] == "string") {
-              if (validateNoSpaces(data[key])) {
-                updateColumns.push(key);
-                values.push(data[key]);
-                placeholder.push(`$${index}`)
-                index++
-              } else {
-                throw new Error("Your data is not valid");
-              }
-            } else {
-              console.log(data[key]);
-              if (validateNumber(data[key])) {
-                updateColumns.push(key);
-                // Assuming price should be a number, parse it
-                values.push(BigInt(data[key], 10));
-                placeholder.push(`$${index}`)
-                index++
-              } else {
-                throw new Error("Your data is not valid");
-              }
-            }
+    let index = 1;
+    const placeholder = [];
+
+    Object.keys(data).forEach((key) => {
+      if (key !== "access_id" && key !== "tanggal_update") {
+        if (typeof data[key] == "string") {
+          if (validateNoSpaces(data[key])) {
+            updateColumns.push(key);
+            values.push(data[key]);
+            placeholder.push(`$${index}`);
+            index++;
+          } else {
+            throw new Error("Your data is not valid");
           }
-        });
-    
-        // Periksa apakah ada kolom yang akan diupdate
-        updateColumns.push("pemilik_dompet");
-        placeholder.push(`$${index}`);
-        values.push(data.access_id);
-        index++;
-
-        // Fetch the current wallet condition
-        const GetConditionDompet = await GetDompetAuthDB(data.access_id);
-
-        // Update "uang_sekarang" based on the conditions
-        let UangSekarangUpdate;
-        if (data.uang_masuk !== undefined) {
-            UangSekarangUpdate = BigInt(GetConditionDompet[0].uang_sekarang,10) + BigInt(data.uang_masuk);
-        } else if (data.uang_keluar !== undefined) {
-            UangSekarangUpdate = BigInt(GetConditionDompet[0].uang_sekarang) - BigInt(data.uang_keluar);
         } else {
-            UangSekarangUpdate = GetConditionDompet[0].uang_sekarang;
+          console.log(data[key]);
+          if (validateNumber(data[key])) {
+            updateColumns.push(key);
+            // Assuming price should be a number, parse it
+            values.push(BigInt(data[key], 10));
+            placeholder.push(`$${index}`);
+            index++;
+          } else {
+            throw new Error("Your data is not valid");
+          }
         }
+      }
+    });
 
-        updateColumns.push("uang_sekarang");
-        placeholder.push(`$${index}`);
-        values.push(UangSekarangUpdate);
+    // Periksa apakah ada kolom yang akan diupdate
+    updateColumns.push("pemilik_dompet");
+    placeholder.push(`$${index}`);
+    values.push(data.access_id);
+    index++;
 
+    // Fetch the current wallet condition
+    const GetConditionDompet = await GetDompetAuthDB(data.access_id);
 
-          // Buat queryText dengan kolom-kolom yang akan diupdate
-        const queryText = `
+    // Update "uang_sekarang" based on the conditions
+    let UangSekarangUpdate;
+    if (data.uang_masuk !== undefined) {
+      UangSekarangUpdate = BigInt(GetConditionDompet[0].uang_sekarang, 10) + BigInt(data.uang_masuk);
+    } else if (data.uang_keluar !== undefined) {
+      UangSekarangUpdate = BigInt(GetConditionDompet[0].uang_sekarang) - BigInt(data.uang_keluar);
+    } else {
+      UangSekarangUpdate = GetConditionDompet[0].uang_sekarang;
+    }
+
+    updateColumns.push("uang_sekarang");
+    placeholder.push(`$${index}`);
+    values.push(UangSekarangUpdate);
+
+    // Buat queryText dengan kolom-kolom yang akan diupdate
+    const queryText = `
         INSERT INTO public.dompet_keuangan (${updateColumns.join(", ")})
         VALUES (${placeholder.join(", ")});
         `;
-    
-          console.log("Update query:", queryText);
-          console.log("Values:", values);
-          // Execute your database update query using the queryText and values
-          // Example:
-          const rows = await pool.query(queryText, values);
-    
-          // Return success message or updated data
-          // console.log(rows.rowCount);
-          return rows;
 
-      } catch (error) {
-        // Handle the error appropriately
-        console.error("Error updating dompet:", error.message);
-        // Optionally, you can throw the error again to propagate it to the calling function
-        throw error;
-      }
+    console.log("Update query:", queryText);
+    console.log("Values:", values);
+    // Execute your database update query using the queryText and values
+    // Example:
+    const rows = await pool.query(queryText, values);
 
-
-    
+    // Return success message or updated data
+    // console.log(rows.rowCount);
+    return rows;
+  } catch (error) {
+    // Handle the error appropriately
+    console.error("Error updating dompet:", error.message);
+    // Optionally, you can throw the error again to propagate it to the calling function
+    throw error;
+  }
 }
-
 
 async function GetStatisticDompetDB(access_id) {
   try {
-    const validasiUUID = validatorUUID(access_id)
+    const validasiUUID = validatorUUID(access_id);
 
-    const queryText =`
+    const queryText = `
     WITH monthly_uang_masuk AS (
     SELECT 
         EXTRACT(YEAR FROM tanggal_update) AS tahun,
@@ -195,34 +188,25 @@ FROM
 ORDER BY
     tahun, bulan;
 
-    `
+    `;
 
     if (validasiUUID) {
-      const {rows} = await pool.query(queryText,[access_id])
+      const { rows } = await pool.query(queryText, [access_id]);
       if (rows) {
-        return rows
-        
-      }else{
-        throw new Error("Failed to fetch data to database")
+        return rows;
+      } else {
+        throw new Error("Failed to fetch data to database");
       }
-    }else{
-      throw new Error("Your data is not valid")
+    } else {
+      throw new Error("Your data is not valid");
     }
-    
   } catch (error) {
-    throw new Error(`${error.message}`)
-    
+    throw new Error(`${error.message}`);
   }
-  
 }
 
-module.exports={
-  
-
-    GetDompetAuthDB,
-    UpdateDompetAuthDB,
-    GetStatisticDompetDB
-}
-
-
-
+module.exports = {
+  GetDompetAuthDB,
+  UpdateDompetAuthDB,
+  GetStatisticDompetDB,
+};

@@ -13,7 +13,7 @@ const GetReviewUser = async (req, res) => {
     const GetAllReview = await GetAllReviewForSpecificUserDB(user[0]);
 
     if (!GetAllReview) {
-        return res.status(400).send({ msg: "Error Fetching Your Review to Database" });
+      return res.status(400).send({ msg: "Error Fetching Your Review to Database" });
     }
 
     res.status(200).send({ msg: "Successfully added review", data: GetAllReview });
@@ -48,4 +48,4 @@ const AddReviewUser = async (req, res) => {
   }
 };
 
-module.exports = { AddReviewUser,GetReviewUser };
+module.exports = { AddReviewUser, GetReviewUser };

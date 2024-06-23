@@ -97,7 +97,7 @@ async function VerifyAlurKeuanganDB(data, user) {
     }
     const tgl_diterima = new Date();
 
-    const queryValues = [uang_diterima, tgl_diterima, status,id];
+    const queryValues = [uang_diterima, tgl_diterima, status, id];
 
     const queryText = `
     UPDATE public.data_keuangan
@@ -112,17 +112,13 @@ async function VerifyAlurKeuanganDB(data, user) {
 
     const { rows } = await pool.query(queryText, queryValues);
 
-
     const dataUpdateDompet = {
-
       access_id: access_id,
       uang_masuk: rows[0].uang_diterima,
-      tanggal_update: new Date()
+      tanggal_update: new Date(),
+    };
 
-
-    }
-
-    await UpdateDompetAuthDB(dataUpdateDompet)
+    await UpdateDompetAuthDB(dataUpdateDompet);
 
     return rows;
   } catch (error) {
@@ -199,10 +195,9 @@ async function GetAllDataKeuanganToDB(access_id, limit, offset) {
   }
 }
 
-
-async function GetAllDataKeuanganToDBPenerima(access_id,limit,offset) {
+async function GetAllDataKeuanganToDBPenerima(access_id, limit, offset) {
   try {
-    const validasiUUID = validatorUUID(access_id)
+    const validasiUUID = validatorUUID(access_id);
     const queryText = `
       SELECT dk.*, 
             penerima_access.asal_daerah AS penerima_name, 
@@ -212,33 +207,27 @@ async function GetAllDataKeuanganToDBPenerima(access_id,limit,offset) {
       JOIN access_id pemberi_access ON dk.pemberi = pemberi_access.id
       WHERE dk.penerima = $1
       LIMIT $2 OFFSET $3;
-    `
+    `;
 
     if (validasiUUID) {
-      const {rows} = await pool.query(queryText,[access_id,limit,offset])
+      const { rows } = await pool.query(queryText, [access_id, limit, offset]);
 
       if (rows) {
-        return rows
-        
-      }else{
-        throw new Error("failed to fetch database")
+        return rows;
+      } else {
+        throw new Error("failed to fetch database");
       }
-      
-    }else{
-      throw new Error("Your Data Is not Valid")
+    } else {
+      throw new Error("Your Data Is not Valid");
     }
-    
   } catch (error) {
-
-    throw new Error(`${error.message}`)
-    
+    throw new Error(`${error.message}`);
   }
-  
 }
-async function GetDataKeuanganToDB(access_id,id) {
+async function GetDataKeuanganToDB(access_id, id) {
   try {
-    const validasiUUID = validatorUUID(access_id)
-    console.log(id)
+    const validasiUUID = validatorUUID(access_id);
+    console.log(id);
     const queryText = `
       SELECT dk.*, 
             penerima_access.asal_daerah AS penerima_name, 
@@ -247,34 +236,28 @@ async function GetDataKeuanganToDB(access_id,id) {
       JOIN access_id penerima_access ON dk.penerima = penerima_access.id
       JOIN access_id pemberi_access ON dk.pemberi = pemberi_access.id
       WHERE dk.pemberi = $1 AND dk.id = $2;
-    `
+    `;
 
     if (validasiUUID) {
-      const {rows} = await pool.query(queryText,[access_id,id])
+      const { rows } = await pool.query(queryText, [access_id, id]);
 
       if (rows) {
-        return rows
-        
-      }else{
-        throw new Error("failed to fetch database")
+        return rows;
+      } else {
+        throw new Error("failed to fetch database");
       }
-      
-    }else{
-      throw new Error("Your Data Is not Valid")
+    } else {
+      throw new Error("Your Data Is not Valid");
     }
-    
   } catch (error) {
-
-    throw new Error(`${error.message}`)
-    
+    throw new Error(`${error.message}`);
   }
-  
 }
 
-async function GetDataKeuanganToDBPenerima(access_id,id) {
+async function GetDataKeuanganToDBPenerima(access_id, id) {
   try {
-    const validasiUUID = validatorUUID(access_id)
-    console.log(id)
+    const validasiUUID = validatorUUID(access_id);
+    console.log(id);
     const queryText = `
       SELECT dk.*, 
             penerima_access.asal_daerah AS penerima_name, 
@@ -283,36 +266,30 @@ async function GetDataKeuanganToDBPenerima(access_id,id) {
       JOIN access_id penerima_access ON dk.penerima = penerima_access.id
       JOIN access_id pemberi_access ON dk.pemberi = pemberi_access.id
       WHERE dk.penerima = $1 AND dk.id = $2;
-    `
+    `;
 
     if (validasiUUID) {
-      const {rows} = await pool.query(queryText,[access_id,id])
+      const { rows } = await pool.query(queryText, [access_id, id]);
 
       if (rows) {
-        return rows
-        
-      }else{
-        throw new Error("failed to fetch database")
+        return rows;
+      } else {
+        throw new Error("failed to fetch database");
       }
-      
-    }else{
-      throw new Error("Your Data Is not Valid")
+    } else {
+      throw new Error("Your Data Is not Valid");
     }
-    
   } catch (error) {
-
-    throw new Error(`${error.message}`)
-    
+    throw new Error(`${error.message}`);
   }
-  
 }
-async function GetStatisticAllDataKeuanganToDB(access_id,query) {
+async function GetStatisticAllDataKeuanganToDB(access_id, query) {
   try {
-    const validasiUUID = validatorUUID(access_id)
+    const validasiUUID = validatorUUID(access_id);
 
-    const {month,year} = query
+    const { month, year } = query;
 
-    console.log(month,year)
+    console.log(month, year);
     const queryText = `
     WITH grouped_data AS (
     SELECT
@@ -340,32 +317,26 @@ async function GetStatisticAllDataKeuanganToDB(access_id,query) {
     ORDER BY
         year, month;
 
-    `
+    `;
 
     if (validasiUUID) {
-      const {rows} = await pool.query(queryText,[access_id,month,year])
+      const { rows } = await pool.query(queryText, [access_id, month, year]);
 
       if (rows) {
-        return rows
-        
-      }else{
-        throw new Error("failed to fetch database")
+        return rows;
+      } else {
+        throw new Error("failed to fetch database");
       }
-      
-    }else{
-      throw new Error("Your Data Is not Valid")
+    } else {
+      throw new Error("Your Data Is not Valid");
     }
-    
   } catch (error) {
-
-    throw new Error(`${error.message}`)
-    
+    throw new Error(`${error.message}`);
   }
-  
 }
 async function GetStatisticAllMonthDataKeuanganToDB(access_id) {
   try {
-    const validasiUUID = validatorUUID(access_id)
+    const validasiUUID = validatorUUID(access_id);
     const queryText = `
 WITH grouped_data AS (
     SELECT
@@ -386,31 +357,23 @@ FROM
 ORDER BY
     year DESC, month DESC;
 
-    `
+    `;
 
     if (validasiUUID) {
-      const {rows} = await pool.query(queryText,[access_id])
+      const { rows } = await pool.query(queryText, [access_id]);
 
       if (rows) {
-        return rows
-        
-      }else{
-        throw new Error("failed to fetch database")
+        return rows;
+      } else {
+        throw new Error("failed to fetch database");
       }
-      
-    }else{
-      throw new Error("Your Data Is not Valid")
+    } else {
+      throw new Error("Your Data Is not Valid");
     }
-    
   } catch (error) {
-
-    throw new Error(`${error.message}`)
-    
+    throw new Error(`${error.message}`);
   }
-  
 }
-
-
 
 module.exports = {
   SearchUserForAccessIdDB,
@@ -423,5 +386,5 @@ module.exports = {
   GetDataKeuanganToDBPenerima,
   GetStatisticAllMonthDataKeuanganToDB,
   GetTotalDataCount,
-  GetTotalDataPenerimaCount
+  GetTotalDataPenerimaCount,
 };

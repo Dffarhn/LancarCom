@@ -9,13 +9,12 @@ async function AddProgressPembangunanToDB(data) {
     const { id_pembangunan, image_progress, progress_pembangunan, dana_digunakan, access_id } = data;
     const DateCreate = new Date();
 
-    let DanaSisa = 0
+    let DanaSisa = 0;
 
+    const GetUpToDateProgress = await GetAllProgressPembangunanToDB(access_id);
 
-    const GetUpToDateProgress = await GetAllProgressPembangunanToDB(access_id)
-    
-    const filteredProgress = GetUpToDateProgress.filter(progress => progress.id_pembangunan === id_pembangunan);
-    
+    const filteredProgress = GetUpToDateProgress.filter((progress) => progress.id_pembangunan === id_pembangunan);
+
     if (filteredProgress.length > 0) {
       const previousDanaSisa = BigInt(filteredProgress[0].dana_sisa || 0);
       const digunakan = BigInt(dana_digunakan || 0);
@@ -31,7 +30,7 @@ async function AddProgressPembangunanToDB(data) {
         throw new Error("Pembangunan tidak ditemukan.");
       }
     }
-    
+
     const queryValues = [id_pembangunan, image_progress, progress_pembangunan, dana_digunakan, DanaSisa, DateCreate];
     const queryText = `
       INSERT INTO public.progress_pembangunan(
@@ -55,22 +54,19 @@ async function AddProgressPembangunanToDB(data) {
       await UpdatePembangunanToDB(updateData);
     }
 
-    
     const dataUpdateDompet = {
-
       access_id: access_id,
       uang_keluar: rows[0].dana_digunakan,
-      tanggal_update: new Date()
-    }
+      tanggal_update: new Date(),
+    };
 
-    await UpdateDompetAuthDB(dataUpdateDompet)
+    await UpdateDompetAuthDB(dataUpdateDompet);
 
     return rows;
   } catch (error) {
     throw new Error(`Error in AddProgressPembangunanToDB: ${error.message}`);
   }
 }
-
 
 async function GetProgressPembangunanToDB(data, access_id) {
   try {
@@ -79,7 +75,7 @@ async function GetProgressPembangunanToDB(data, access_id) {
     if (!validasiUUID) {
       throw new Error("Your data is not Valid");
     }
-    const queryValues = [access_id,data];
+    const queryValues = [access_id, data];
 
     const queryText = `
         SELECT DISTINCT ON (pp.id_pembangunan)
@@ -170,7 +166,6 @@ async function GetAllProgressPembangunanToDB(access_id) {
       throw new Error("Failed To get data to Database");
     }
 
-
     return rows;
   } catch (error) {
     throw new Error(`${error.message}`);
@@ -180,5 +175,5 @@ async function GetAllProgressPembangunanToDB(access_id) {
 module.exports = {
   AddProgressPembangunanToDB,
   GetProgressPembangunanToDB,
-  GetAllProgressPembangunanToDB
+  GetAllProgressPembangunanToDB,
 };

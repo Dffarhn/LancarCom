@@ -14,7 +14,7 @@ const AddPembangunan = async (req, res) => {
     const { access_id } = user[0];
 
     const data = req.body;
-    console.log(data)
+    console.log(data);
     const requiredFields = ["nama_pembangunan", "lokasi_pembangunan", "dana_pembangunan"];
 
     const isValidRequest = validateRequestBody(data, requiredFields);
@@ -112,7 +112,6 @@ const UpdatePembangunan = async (req, res) => {
     }
   } catch (error) {
     res.status(500).send({ msg: `${error.message}` });
-
   }
 };
 module.exports = { GetAllPembangunan, GetPembangunan, AddPembangunan, UpdatePembangunan };
