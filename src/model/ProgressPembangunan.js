@@ -146,7 +146,7 @@ async function GetAllProgressPembangunanToDB(access_id) {
         p.pemilik_pembangunan
     FROM
         public.progress_pembangunan pp
-    JOIN
+    LEFT JOIN
         public.pembangunan p
     ON
         pp.id_pembangunan = p.id

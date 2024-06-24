@@ -1,6 +1,6 @@
 const { validateRequestBody } = require("../function/Validator");
 const { SearchUserForAccessIdDB } = require("../model/DataKeuanganModel");
-const { GetAllDataPembangunansDB, getDataPembangunanDB, AddDataPembangunanToDB, UpdatePembangunanToDB } = require("../model/Pembangunan");
+const { GetAllDataPembangunansDB, getDataPembangunanDB, AddDataPembangunanToDB, UpdatePembangunanToDB, GetAllStatisticPembangunansDB } = require("../model/Pembangunan");
 
 const AddPembangunan = async (req, res) => {
   try {
@@ -114,4 +114,30 @@ const UpdatePembangunan = async (req, res) => {
     res.status(500).send({ msg: `${error.message}` });
   }
 };
-module.exports = { GetAllPembangunan, GetPembangunan, AddPembangunan, UpdatePembangunan };
+
+
+
+const GetStatisticAllPembangunan = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    console.log(userId);
+    // Use the user ID to fetch user details from the database
+    const user = await SearchUserForAccessIdDB(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    const { access_id } = user[0];
+
+    const getAllDataPembangunan = await GetAllStatisticPembangunansDB(access_id);
+
+    if (getAllDataPembangunan) {
+      res.status(200).send({ msg: "Query Successfully", data: getAllDataPembangunan });
+    } else {
+      throw new Error("failed to get fetch from Database");
+    }
+  } catch (error) {
+    res.status(500).send({ msg: `${error.message}` });
+  }
+};
+
+module.exports = { GetAllPembangunan, GetPembangunan, AddPembangunan, UpdatePembangunan, GetStatisticAllPembangunan };

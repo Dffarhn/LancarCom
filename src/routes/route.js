@@ -7,9 +7,10 @@ const { AddAlurKeuangan, VerifyAlurKeuangan, GetAllDataKeuangan, GetStatisticAll
 const { GetAllDaerahAccessId, AddRequestAccessId } = require("./AccessIdRoute");
 const { AddReviewUser, GetReviewUser } = require("./ReviewRoute");
 const { AddPostUser } = require("./PostRoute");
-const { GetAllPembangunan, GetPembangunan, AddPembangunan, UpdatePembangunan } = require("./PembangunansRoute");
+const { GetAllPembangunan, GetPembangunan, AddPembangunan, UpdatePembangunan, GetStatisticAllPembangunan } = require("./PembangunansRoute");
 const { getProgressPembangunan, getAllProgressPembangunan, AddProgressPembangunan } = require("./ProgressPembangunanRoute");
 const { AskAIRoute, getAllRekomendasi, ChatAiRoute, getSpesificRekomendasi, AskSpesificAIRoute } = require("./AskAIRoute");
+const { SendRekomendasiRoute, GetAllRekomendasiRoute, GetSpesificRekomendasiRoute } = require("./Inbox");
 const route = Router();
 
 route.get("/", (req, res) => {
@@ -49,6 +50,8 @@ route.get("/pembangunan/:pembangunan_id", Auth_Access, GetPembangunan);
 route.post("/pembangunan", Auth_Access, AddPembangunan);
 route.patch("/pembangunan/:pembangunan_id", Auth_Access, UpdatePembangunan);
 
+route.get("/statistic/pembangunan",Auth_Access, GetStatisticAllPembangunan )
+
 //Review User
 route.get("/review", Auth_Access, GetReviewUser);
 route.post("/review", Auth_Access, AddReviewUser);
@@ -72,5 +75,12 @@ route.get("/rekomendasiAI", Auth_Access, getAllRekomendasi);
 route.get("/rekomendasiAI/:id", Auth_Access, getSpesificRekomendasi);
 
 route.post("/ChatAI", Auth_Access, ChatAiRoute);
+
+
+//Inbox
+
+route.post("/send/rekomendasiAI",Auth_Access,SendRekomendasiRoute)
+route.get("/inbox",Auth_Access,GetAllRekomendasiRoute)
+route.get("/inbox/message/:id",Auth_Access,GetSpesificRekomendasiRoute)
 
 module.exports = { route };

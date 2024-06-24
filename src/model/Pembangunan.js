@@ -193,4 +193,39 @@ async function UpdatePembangunanToDB(data) {
   }
 }
 
-module.exports = { GetAllDataPembangunansDB, getDataPembangunanDB, AddDataPembangunanToDB, UpdatePembangunanToDB };
+async function GetAllStatisticPembangunansDB(access_id) {
+  try {
+    const validasiuuid = validatorUUID(access_id);
+
+    const queryText = `
+            
+            SELECT
+                SUM(CASE WHEN P.status_pembangunan = 'pending' THEN 1 ELSE 0 END) AS count_pending,
+                SUM(CASE WHEN P.status_pembangunan = 'ongoing' THEN 1 ELSE 0 END) AS count_ongoing,
+                SUM(CASE WHEN P.status_pembangunan = 'completed' THEN 1 ELSE 0 END) AS count_completed
+            FROM
+                pembangunan P
+            WHERE
+                P.pemilik_pembangunan = $1;
+
+
+
+        `;
+
+    if (validasiuuid) {
+      const { rows } = await pool.query(queryText, [access_id]);
+      console.log(rows);
+      if (rows) {
+        return rows;
+      } else {
+        throw new Error("Failed to fetch into database");
+      }
+    } else {
+      throw new Error("Your uuid is not valid");
+    }
+  } catch (error) {
+    throw new Error(`${error.message}`);
+  }
+}
+
+module.exports = { GetAllDataPembangunansDB, getDataPembangunanDB, AddDataPembangunanToDB, UpdatePembangunanToDB , GetAllStatisticPembangunansDB};
