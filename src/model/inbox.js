@@ -5,6 +5,8 @@ async function addMessageToDB(data, accessId) {
   try {
     const { isi_rekomendasi, rekomendasi_ke } = data;
 
+    console.log(data)
+
     const isValidIsiRekomendasi = validatorUUID(isi_rekomendasi);
     const isValidRekomendasiKe = validatorUUID(rekomendasi_ke);
 
@@ -17,16 +19,17 @@ async function addMessageToDB(data, accessId) {
 
     const queryText = `
       INSERT INTO public.inbox(
-        isi_rekomendasi, rekomendasi_ke, rekomendasi_dari, created_at
-      ) VALUES ($1, $2, $3, $4)
+        isi_rekomendasi, rekomendasi_ke, rekomendasi_dari
+      ) VALUES ($1, $2, $3)
       RETURNING id;
     `;
 
-    const createdAt = new Date();
+  
 
-    const queryValues = [isi_rekomendasi, rekomendasi_ke, accessId, createdAt];
+    const queryValues = [isi_rekomendasi, rekomendasi_ke, accessId];
 
     const { rows } = await pool.query(queryText, queryValues);
+    console.log(rows)
 
     if (rows.length > 0) {
       return rows[0]; // Assuming you want to return the first row
