@@ -51,7 +51,7 @@ const GetAllRekomendasiRoute = async (req, res) => {
       return res.status(500).send({ msg: "Failed to Send Message" });
     }
 
-    res.status(200).send({ msg: "Query Successfully", data: `${GetAllInbox}` });
+    res.status(200).send({ msg: "Query Successfully", data: GetAllInbox });
   } catch (error) {
     res.status(500).send({ msg: `${error.message}` });
   }
@@ -71,11 +71,13 @@ const GetSpesificRekomendasiRoute = async (req, res) => {
 
     const GetInbox = await GetSpesificInboxToDB(id,access_id);
 
+    console.log(GetInbox)
+
     if (!GetInbox) {
       return res.status(500).send({ msg: "Failed to Send Message" });
     }
 
-    res.status(200).send({ msg: "Query Successfully", data: `${GetInbox}` });
+    res.status(200).send({ msg: "Query Successfully", data: GetInbox });
   } catch (error) {
     res.status(500).send({ msg: `${error.message}` });
   }

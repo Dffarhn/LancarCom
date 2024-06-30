@@ -48,12 +48,20 @@ async function GetAllInboxToDB(access_id) {
     if (!isValidPunyaRekomendasi) {
       throw new Error("Invalid Penerima UUID");
     }
-    const queryText = `Select * from inbox where rekomendasi_ke = $1`;
+    const queryText = `
+    SELECT i.*, RA.rekomendasi_ke, RA.rekomendasi_ai, RA.alasan, AI.asal_daerah 
+    FROM inbox i
+    JOIN rekomendasi_ai RA ON RA.id = i.isi_rekomendasi
+    JOIN access_id AI ON i.rekomendasi_dari = AI.id
+    WHERE i.rekomendasi_ke = $1
+`;
     const queryValues = [access_id];
 
     const { rows } = await pool.query(queryText, queryValues);
 
-    if (rows.length > 0) {
+    console.log(rows)
+
+    if (rows) {
       return rows; // Assuming you want to return the first row
     } else {
       throw new Error("Failed to get message to database");
@@ -65,16 +73,22 @@ async function GetAllInboxToDB(access_id) {
 async function GetSpesificInboxToDB(id,access_id) {
   try {
     const isValidPunyaRekomendasi = validatorUUID(access_id);
+    console.log(id)
 
     if (!isValidPunyaRekomendasi) {
       throw new Error("Invalid Penerima UUID");
     }
-    const queryText = `Select * from inbox where rekomendasi_ke = $1 AND id = $2`;
+    const queryText = `
+    SELECT i.*, RA.rekomendasi_ke, RA.rekomendasi_ai, RA.alasan, AI.asal_daerah 
+    FROM inbox i
+    JOIN rekomendasi_ai RA ON RA.id = i.isi_rekomendasi
+    JOIN access_id AI ON i.rekomendasi_dari = AI.id  
+    where i.rekomendasi_ke = $1 AND i.id = $2`;
     const queryValues = [access_id,id];
 
     const { rows } = await pool.query(queryText, queryValues);
 
-    if (rows.length > 0) {
+    if (rows) {
       return rows; // Assuming you want to return the first row
     } else {
       throw new Error("Failed to get message to database");

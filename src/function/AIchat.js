@@ -161,6 +161,61 @@ async function getGroqChatMandiri(content) {
     throw error;
   }
 }
+async function getGroqSelectionReview(content) {
+  try {
+    const response = await groq.chat.completions.create({
+      messages: [
+        {
+          role: "system",
+          content: `Your name is LancarAI and You are a helpful assistant. Your task is to analyze a list of reviews about construction and development projects in Indonesia and filter out the ones that are likely written by bots. Consider the following criteria for determining whether a review is human-written:  
+                    1. Natural Language Use: Reviews that use varied sentence structures, appropriate punctuation, and natural language flow.
+                    2. Emotional Tone: Human reviews often contain emotional expressions, opinions, and personal experiences.
+                    3. Specificity and Detail: Reviews that provide specific details about the project or experience are more likely to be human-written.
+                    4. Grammar and Spelling: While not perfect, human-written reviews often have minor spelling and grammar mistakes, whereas bot reviews might be too perfect or too flawed in a systematic way.
+                    
+                    Here are examples to help you differentiate:
+                    
+                    Examples of Human-Written Reviews:
+                    1. 'Pembangunan jalan tol baru di Jakarta sangat membantu mengurangi kemacetan. Saya sekarang bisa pergi ke kantor lebih cepat dan tanpa stres.'
+                    2. 'Revitalisasi kawasan kota tua di Semarang sangat menarik. Kawasan ini sekarang menjadi lebih bersih dan nyaman untuk dikunjungi, terutama pada akhir pekan.'
+                    3. 'Proyek pembangunan bendungan di Kalimantan memberikan manfaat besar bagi para petani. Mereka sekarang memiliki sumber air yang lebih stabil untuk irigasi.'
+                    4. 'Pembangunan MRT di Jakarta memang baik, tapi proses pembangunannya sangat mengganggu. Jalanan jadi macet dan berdebu. Harus ada manajemen konstruksi yang lebih baik.'
+                    5. 'Pembangunan gedung-gedung tinggi di Surabaya tampaknya tidak mempertimbangkan ruang hijau. Kota ini semakin panas dan polusi semakin parah.'
+                    6. 'Proyek renovasi pasar tradisional di Bandung mengecewakan. Pedagang tidak diberi tempat yang layak selama proses renovasi dan banyak yang merugi.'
+
+                    Examples of Bot-Generated Reviews:
+                    1. 'Jalan tol baru bagus. Kemacetan berkurang. Sangat membantu.'
+                    2. 'Revitalisasi kota tua menarik. Bersih dan nyaman. Sangat bagus.'
+                    3. 'Bendungan di Kalimantan bermanfaat. Air stabil. Petani senang.'
+                    4. 'MRT mengganggu. Macet dan berdebu. Tidak baik.'
+                    5. 'Gedung tinggi di Surabaya buruk. Ruang hijau kurang. Polusi meningkat.'
+                    6. 'Renovasi pasar buruk. Pedagang dirugikan. Proyek tidak baik.'
+                    
+                    Analyze the following reviews and only keep those that you believe are human-written."
+ 
+
+                    make sure ur suggest its to the point, u dont have to explain about yourself first
+                    This website was built by a dedicated team from Universitas Islam Indonesia:
+                    Backend Developer: Muhammad Daffa Raihan 
+                    Frontend Developer: Raisha Alma 
+                    UI/UX Designers: Safinatun Najah and Zardari AlGhifari`
+        },
+        {
+          role: "user",
+          content: `Analyze The All Review For this City : ${content} Explain in bahasa Indonesia please and give me back the review that u think is human-written`
+        }
+      ],
+      model: "llama3-8b-8192",
+      temperature: 0.8,
+      max_tokens: 1024
+    });
+
+    return response;
+  } catch (error) {
+    console.error("Error in API call:", error);
+    throw error;
+  }
+}
 
 
 function KelolaRekomendasiText(text) {
@@ -203,6 +258,7 @@ function formatReviews(reviews) {
 module.exports = {
   AskAiChat,
   KelolaRekomendasiText,
-  formatReviews
+  formatReviews,
+  getGroqSelectionReview
 }
 // AskAiChat("Halo Kamu siapa?")

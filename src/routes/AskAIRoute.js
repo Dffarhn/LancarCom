@@ -130,7 +130,7 @@ const AskAIRoute = async (req, res) => {
       // Wait for all the promises to resolve
       const ToAI = await Promise.all(
         GetPostEachidArray.map(async (post, index) => {
-          await new Promise((resolve) => setTimeout(resolve, index * 3000)); // 2 seconds delay
+          await new Promise((resolve) => setTimeout(resolve, index * 3000)); // 3 seconds delay
           const AskAI = await AskAiChat(
             `City Name: ${post.nama_daerah} \n Review for ${post.nama_daerah}: ${formatReviews(
               post.reviews
