@@ -192,7 +192,11 @@ async function getGroqSelectionReview(content) {
                     6. 'Renovasi pasar buruk. Pedagang dirugikan. Proyek tidak baik.'
                     
                     Analyze the following reviews and only keep those that you believe are human-written."
- 
+                    Your Output it just Send back all the review that u belive that human-written, DON'T add another comment on my output, just send back all review that u think its human writen
+                    Your Output MUST LIKE THIS :
+                    "REVIEW:
+                     --ALL REVIEW--                     
+                    "
 
                     make sure ur suggest its to the point, u dont have to explain about yourself first
                     This website was built by a dedicated team from Universitas Islam Indonesia:
@@ -210,7 +214,7 @@ async function getGroqSelectionReview(content) {
       max_tokens: 1024
     });
 
-    return response;
+    return response.choices[0]?.message?.content || "";
   } catch (error) {
     console.error("Error in API call:", error);
     throw error;

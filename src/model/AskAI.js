@@ -57,12 +57,13 @@ async function AddRekomendasiToDB(data) {
   }
 }
 
-async function GetRekomendasiAItoDB(data, limit, offset, tipe) {
+async function GetRekomendasiAItoDB(data, limit, offset, tipe, searchQuery) {
   try {
     // Construct placeholders for the IN clause
     const placeholders = data.map((_, index) => `$${index + 1}`).join(", ");
     const addsomelimit = `LIMIT ${limit} OFFSET ${offset};`;
-    // Construct the query text with the dynamic IN clause
+    
+    // Construct the query text with the dynamic IN clause and search query
     const queryText = `
         WITH ranked_recommendations AS (
             SELECT 
@@ -72,6 +73,7 @@ async function GetRekomendasiAItoDB(data, limit, offset, tipe) {
             LEFT JOIN access_id a ON r.rekomendasi_ke = a.id
             WHERE r.rekomendasi_ke IN (${placeholders})
                 AND r.type = '${tipe}'
+                AND a.asal_daerah LIKE '%${searchQuery}%'
         )
         SELECT 
             rr.*,
@@ -81,10 +83,7 @@ async function GetRekomendasiAItoDB(data, limit, offset, tipe) {
         WHERE rr.rn = 1
         ORDER BY rr.kondisi DESC
         ${addsomelimit};
-
-
-
-        `;
+    `;
 
     // Execute the query with the data array as the parameter values
     const { rows } = await pool.query(queryText, data);
@@ -92,11 +91,9 @@ async function GetRekomendasiAItoDB(data, limit, offset, tipe) {
     return rows; // Assuming you want to return the result
   } catch (error) {
     throw new Error(`${error.message}`);
-    //const async ufnctin ( message ) {const id : sama dengan pou melakukan semua kegiatan ini}
-    // {try catch {}}
-    // async functuon to do this i will const Register USer Login User require )
   }
 }
+
 async function GetSpesificRekomendasiAItoDB(data, tipe) {
   try {
     console.log(data);

@@ -87,7 +87,7 @@ const GetAllDataKeuangan = async (req, res) => {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
     const offset = (page - 1) * limit;
-
+    const searchQuery = req.query.search || ""; 
     const userId = req.user.id;
     // Use the user ID to fetch user details from the database
     const user = await SearchUserForAccessIdDB(userId);
@@ -101,7 +101,7 @@ const GetAllDataKeuangan = async (req, res) => {
     const totalDataCountResult = await GetTotalDataCount(access_id);
     const totalDataCount = totalDataCountResult.count;
 
-    const allDataKeuangan = await GetAllDataKeuanganToDB(access_id, limit, offset);
+    const allDataKeuangan = await GetAllDataKeuanganToDB(access_id, limit, offset,searchQuery);
 
     if (allDataKeuangan) {
       res.status(200).send({

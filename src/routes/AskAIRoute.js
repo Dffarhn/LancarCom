@@ -1,4 +1,4 @@
-const { AskAiChat, formatReviews } = require("../function/AIchat");
+const { AskAiChat, formatReviews, getGroqSelectionReview } = require("../function/AIchat");
 const { transformData, formatDevelopmentProgress } = require("../function/DataAI");
 const { GetSpesificDaerahDB } = require("../model/AccessId");
 const { GetTheChild, AddRekomendasiToDB, GetRekomendasiAItoDB, GetSpesificRekomendasiAItoDB } = require("../model/AskAI");
@@ -131,10 +131,14 @@ const AskAIRoute = async (req, res) => {
       const ToAI = await Promise.all(
         GetPostEachidArray.map(async (post, index) => {
           await new Promise((resolve) => setTimeout(resolve, index * 3000)); // 3 seconds delay
+
+          const GetDataHistoryPembangunan = await GetAllProgressPembangunanToDB(post.id);
+          const DevelopmentProgressFilter = formatDevelopmentProgress(GetDataHistoryPembangunan);
+          const FilterReview = await getGroqSelectionReview(formatReviews(post.reviews));
           const AskAI = await AskAiChat(
-            `City Name: ${post.nama_daerah} \n Review for ${post.nama_daerah}: ${formatReviews(
-              post.reviews
-            )} \n Give Your Analyze about this city from the review that u have get, i please do honestly explain in bahasa indonesia and must output with your output formatted`,
+            `City Name: ${post.nama_daerah} \n Review for ${post.nama_daerah}: ${FilterReview}
+           \n Development Progress ${post.nama_daerah}: ${DevelopmentProgressFilter}
+            Give Your Analyze about this city from the review and Development Progress that u have get, i please do honestly explain in bahasa indonesia and must output with your output formatted`,
             "generate",
             "pembangunan"
           );
@@ -240,10 +244,13 @@ const AskSpesificAIRoute = async (req, res) => {
       const ToAI = await Promise.all(
         GetPostEachidArray.map(async (post, index) => {
           await new Promise((resolve) => setTimeout(resolve, index * 3000)); // 2 seconds delay
+          const GetDataHistoryPembangunan = await GetAllProgressPembangunanToDB(post.id);
+          const DevelopmentProgressFilter = formatDevelopmentProgress(GetDataHistoryPembangunan);
+          const FilterReview = await getGroqSelectionReview(formatReviews(post.reviews));
           const AskAI = await AskAiChat(
-            `City Name: ${post.nama_daerah} \n Review for ${post.nama_daerah}: ${formatReviews(
-              post.reviews
-            )} \n Give Your Analyze about this city from the review that u have get, i please do honestly explain in bahasa indonesia and must output with your output formatted`,
+            `City Name: ${post.nama_daerah} \n Review for ${post.nama_daerah}: ${FilterReview}
+           \n Development Progress ${post.nama_daerah}: ${DevelopmentProgressFilter}
+            Give Your Analyze about this city from the review and Development Progress that u have get, i please do honestly explain in bahasa indonesia and must output with your output formatted`,
             "generate",
             "pembangunan"
           );
@@ -279,6 +286,7 @@ const getAllRekomendasi = async (req, res) => {
     const offset = (page - 1) * limit;
 
     const tipe = req.query.type || "Keuangan";
+    const searchQuery = req.query.search || ""; // Add search query parameter
 
     const userId = req.user.id;
     // Use the user ID to fetch user details from the database
@@ -290,9 +298,7 @@ const getAllRekomendasi = async (req, res) => {
     const { access_id } = user[0];
 
     // Fetch the total data count for pagination
-
     const getChildFromAccessId = await GetTheChild(access_id);
-
     if (!getChildFromAccessId) {
       return res.status(500).send({ msg: "Failed to fetch data child" });
     }
@@ -300,10 +306,9 @@ const getAllRekomendasi = async (req, res) => {
     const theChild = getChildFromAccessId.map((item) => {
       return item.id;
     });
-    // const totalDataCountResult = await GetTotalDataCount(access_id);
     const totalDataCount = theChild.length - 1;
 
-    const GetDataRekomendasiToDB = await GetRekomendasiAItoDB(theChild, limit, offset, tipe);
+    const GetDataRekomendasiToDB = await GetRekomendasiAItoDB(theChild, limit, offset, tipe, searchQuery); // Pass search query
 
     if (GetDataRekomendasiToDB) {
       res.status(200).send({
@@ -313,12 +318,13 @@ const getAllRekomendasi = async (req, res) => {
         totalPages: Math.ceil(totalDataCount / limit),
       });
     } else {
-      res.status(500).send({ msg: "error to fetch database" });
+      res.status(500).send({ msg: "Error to fetch database" });
     }
   } catch (error) {
     res.status(500).json({ message: `${error.message}` });
   }
 };
+
 const getSpesificRekomendasi = async (req, res) => {
   try {
     const tipe = req.query.type || "Keuangan";

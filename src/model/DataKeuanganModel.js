@@ -165,7 +165,7 @@ async function GetTotalDataPenerimaCount(access_id) {
   }
 }
 
-async function GetAllDataKeuanganToDB(access_id, limit, offset) {
+async function GetAllDataKeuanganToDB(access_id, limit, offset,searchQuery) {
   try {
     const validasiUUID = validatorUUID(access_id);
     const queryText = `
@@ -175,7 +175,8 @@ async function GetAllDataKeuanganToDB(access_id, limit, offset) {
       FROM data_keuangan dk
       JOIN access_id penerima_access ON dk.penerima = penerima_access.id
       JOIN access_id pemberi_access ON dk.pemberi = pemberi_access.id
-      WHERE dk.pemberi = $1
+      WHERE dk.pemberi = $1 
+      AND penerima_access.asal_daerah LIKE '%${searchQuery}%'
       LIMIT $2 OFFSET $3;
     `;
 
