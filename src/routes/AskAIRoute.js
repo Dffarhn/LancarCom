@@ -102,7 +102,8 @@ const AskAIRoute = async (req, res) => {
           Development Progress for  ${data.City} : ${data.DevelopmentProgress}
           
           
-          \n Give Your Analyze about this city from the Financial History and Development Progress that u  get, i please do honestly explain in bahasa indonesia and must output with your output formatted`,
+          \n Give Your Analyze about this city from the Financial History and Development Progress that u  get, 
+          i please do honestly explain in bahasa indonesia and must output with your output formatted`,
             "generate",
             "keuangan"
           );
